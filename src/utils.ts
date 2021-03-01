@@ -3,7 +3,6 @@
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *************************************************************************************************/
 import * as ghCore from "@actions/core";
-import { Inputs } from "./generated/inputs-outputs";
 
 type OS = "linux" | "macos" | "windows";
 
@@ -30,7 +29,6 @@ export function getOS(): OS {
     return currentOS;
 }
 
-export function getSelector(): string {
-    const appName = ghCore.getInput(Inputs.APP_NAME);
+export function getSelector(appName: string): string {
     return `app=${appName}`;
 }

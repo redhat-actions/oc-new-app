@@ -27,4 +27,10 @@ export enum Outputs {
      * Default: None.
      */
     ROUTE = "route",
+    /**
+     * Selector to filer out the deployment
+     * Required: false
+     * Default: None.
+     */
+    SELECTOR = "selector",
 }

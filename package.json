@@ -4,10 +4,10 @@
   "engines": {
     "node": "12"
   },
-  "description": "Action for Deloying and Exposing App on openshift",
+  "description": "Action for Deloying and Exposing App on Openshift",
   "repository": {
     "type": "git",
-    "url": "https://github.com/redhat-actions/buildah-build"
+    "url": "https://github.com/redhat-actions/oc-new-app"
   },
   "main": "dist/index.js",
   "scripts": {
@@ -24,10 +24,8 @@
     "@actions/exec": "^1.0.4"
   },
   "devDependencies": {
-    "@actions/core": "^1.2.6",
-    "@actions/exec": "^1.0.4",
     "@redhat-actions/action-io-generator": "^1.5.0",
-    "@redhat-actions/eslint-config": "^1.2.13",
+    "@redhat-actions/eslint-config": "^1.2.14",
     "@redhat-actions/tsconfig": "^1.1.1",
     "@types/node": "^14.14.31",
     "@typescript-eslint/eslint-plugin": "^4.15.2",

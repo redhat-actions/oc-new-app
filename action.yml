@@ -5,18 +5,20 @@ branding:
   icon: circle
   color: red
 inputs:
+  app_name:
+    description: 'Name to use for generated application artifacts'
+    required: true
   image:
     description: 'The name (reference) of the image to create deployment'
     required: true
   port:
     description: 'The port to use for the application'
     required: false
-  app_name:
-    description: 'Name to use for generated application artifacts'
-    required: true
 outputs:
   route:
     description: 'Service route of the deployed application'
+  selector:
+    description: 'Selector to filer out the deployment'
 runs:
   using: 'node12'
   main: 'dist/index.js'
