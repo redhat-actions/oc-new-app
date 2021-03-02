@@ -34,13 +34,13 @@ namespace Oc {
      * oc flags. Create an Options object with these, and then pass it to getOptions.
      */
     export enum Flags {
-            Selector = "selector",
-            Name = "name",
-            DockerImage = "docker-image",
-            Port = "port",
-            Patch = "patch",
-            Output = "output",
-            JSONPath = "jsonpath",
+        Selector = "selector",
+        Name = "name",
+        DockerImage = "docker-image",
+        Port = "port",
+        Patch = "patch",
+        Output = "output",
+        JSONPath = "jsonpath",
     }
 
     export type Options = { [key in Flags]?: string };

@@ -31,7 +31,7 @@ async function run(): Promise<void> {
     await Deploy.getDeployment(appSelector);
 
     const route = await Deploy.getRoute(appName);
-    ghCore.info(`${appName} is exposed to ${route}`);
+    ghCore.info(`✅ ${appName} is exposed to ${route}`);
 
     ghCore.setOutput(Outputs.ROUTE, route);
     ghCore.setOutput(Outputs.SELECTOR, appSelector);
