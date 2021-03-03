@@ -1,0 +1,63 @@
+name: OpenShift Pet Clinic Workflow
+on: [ push, workflow_dispatch ]
+
+env:
+  IMAGE_PATH: quay.io/diagrawa/petclinic:latest
+  TEST_NAMESPACE: diagrawa-code
+  APP_NAME: petclinic
+  APP_PORT: 8080
+
+jobs:
+  ## To keep the workflow simple, we will only be using oc-new-app action in the workflow and use the
+  ## 'petclinic' image which we already have on quay.io
+  #####################################################################################################################
+  ## The OpenShift Deploy step deploys the image that we have previously created and present on quay.io
+  ## It can then run any integration tests before deleting the resources that were created.
+  openshift-deploy:
+    name: Deploy on OpenShift
+    runs-on: ubuntu-20.04
+    steps:
+      - uses: actions/checkout@v2
+
+       # Use the commit short-sha as the suffix of the app_name
+      - name: Get commit short-sha
+        id: commit-data
+        uses: redhat-actions/common/commit-data@v1
+
+      # Log into the OpenShift cluster using the secrets configured in the repository settings.
+      # The GitHub Ubuntu runners have oc pre-installed.
+      # If you're not using those runners, be sure to check out https://github.com/redhat-actions/oc-installer.
+      - name: OpenShift login
+        uses: redhat-actions/oc-login@v1
+        with:
+          openshift_server_url: ${{ secrets.OPENSHIFT_SERVER }}
+          openshift_token: ${{ secrets.OPENSHIFT_TOKEN }}
+          # openshift_username:
+          # openshift_password:
+          insecure_skip_tls_verify: true
+          namespace: ${{ env.TEST_NAMESPACE }}
+
+      - name: Create and expose app
+        id: oc-new-app
+        uses: ./
+        with:
+          app_name: ${{ env.APP_NAME }}-${{ steps.commit-data.outputs.short_sha }}
+          port: ${{ env.APP_PORT }}
+          image: ${{ env.IMAGE_PATH }}
+
+      # Perform a (very) basic integration test.
+      # This step is retried since the time to pull the image and start the pod can vary.
+      - name: Test project is running
+        id: test-project
+        uses: nick-invision/retry@v2.2.0
+        with:
+          timeout_seconds: 3
+          retry_wait_seconds: 10
+          max_attempts: 30
+          warning_on_retry: false
+          # Just check that the root endpoint returns a success status (-f flag).
+          command: curl -sSfLi ${{ steps.oc-new-app.outputs.route }}
+
+      - name: Delete deployment that was created
+        run:
+          oc delete all --selector=${{ steps.oc-new-app.outputs.selector }}
