@@ -38,12 +38,13 @@ namespace Deploy {
      */
     export async function patchSvc(appName: string, port: string): Promise<void> {
         ghCore.info(`⏳ Patching service with the port ${port} ...`);
+        const portInt = Number(port);
         const patchJson = {
             spec: {
                 ports: [
                     {
-                        name: `${port}-tcp`,
-                        port: parseInt(port, 10),
+                        name: `${portInt}-tcp`,
+                        port: portInt,
                     },
                 ],
             },
