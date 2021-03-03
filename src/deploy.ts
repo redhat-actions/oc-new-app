@@ -43,7 +43,7 @@ namespace Deploy {
                 ports: [
                     {
                         name: `${port}-tcp`,
-                        port,
+                        port: parseInt(port, 10),
                     },
                 ],
             },
