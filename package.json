@@ -4,7 +4,7 @@
   "engines": {
     "node": "12"
   },
-  "description": "Action for deloying and exposing application on Openshift",
+  "description": "Action for deploying and exposing application on Openshift",
   "repository": {
     "type": "git",
     "url": "https://github.com/redhat-actions/oc-new-app"
