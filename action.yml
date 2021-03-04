@@ -1,5 +1,5 @@
-name: 'oc new-app'
-description: 'Deploy and Expose an app on Openshift'
+name: 'oc-new-app'
+description: 'Deploy and expose an application on Openshift'
 author: 'Red Hat'
 branding:
   icon: circle
