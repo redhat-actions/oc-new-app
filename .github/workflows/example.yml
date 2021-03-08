@@ -43,8 +43,9 @@ jobs:
         uses: ./
         with:
           app_name: ${{ env.APP_NAME }}-${{ steps.commit-data.outputs.short_sha }}
-          port: ${{ env.APP_PORT }}
           image: ${{ env.IMAGE_PATH }}
+          namespace: ${{ env.TEST_NAMESPACE }}
+          port: ${{ env.APP_PORT }}
 
       # Perform a (very) basic integration test.
       # This step is retried since the time to pull the image and start the pod can vary.
@@ -63,4 +64,4 @@ jobs:
       - name: Delete deployment that was created
         if: always()
         run:
-          oc delete all --selector=${{ steps.oc-new-app.outputs.selector }}
+          oc delete all --selector=${{ steps.oc-new-app.outputs.selector }} -n ${{ env.TEST_NAMESPACE }}

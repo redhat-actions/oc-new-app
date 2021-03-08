@@ -14,23 +14,33 @@ async function run(): Promise<void> {
 
     const appName = ghCore.getInput(Inputs.APP_NAME);
     const image = ghCore.getInput(Inputs.IMAGE);
+    const namespace = ghCore.getInput(Inputs.NAMESPACE);
     const port = ghCore.getInput(Inputs.PORT);
 
     const appSelector = utils.getSelector(appName);
+    let namespaceArg = "";
+    if (namespace) {
+        namespaceArg = `--namespace=${namespace}`;
+    }
+    else {
+        ghCore.info(`No namespace provided`);
+    }
 
     // Take down any old deployment
-    await Deploy.deleteDeployment(appSelector);
+    await Deploy.deleteDeployment(appSelector, namespaceArg);
 
-    await Deploy.newApp(appName, image);
+    await Deploy.newApp(appName, image, namespaceArg);
 
     // Make sure the app port is exposed
-    await Deploy.patchSvc(appName, port);
+    await Deploy.patchSvc(appName, port, namespaceArg);
 
-    await Deploy.exposeSvc(appName, port);
+    await Deploy.exposeSvc(appName, port, namespaceArg);
 
-    await Deploy.getDeployment(appSelector);
+    await Deploy.getDeployment(appSelector, namespaceArg);
 
-    const route = await Deploy.getRoute(appName);
+    let route = await Deploy.getRoute(appName, namespaceArg);
+    // To make it appear as a URL
+    route = `http://${route}`;
     ghCore.info(`✅ ${appName} is exposed at ${route}`);
 
     ghCore.setOutput(Outputs.ROUTE, route);
