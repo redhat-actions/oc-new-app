@@ -13,7 +13,7 @@ oc-new-app is a Github Action for deploying and exposing an application on Opens
 
 `oc` must be installed on the GitHub Action runner you specify.
 - Presently the [Ubuntu Environments](https://github.com/actions/virtual-environments#available-environments) come with `oc 4.7.0` installed.
-- If you want a different version of `oc`, or if you are using the Mac or Windows environments, use the [`oc-installer`](https://github.com/redhat-actions/oc-installer) action to install `oc` before running this action.
+- If you want a different version of `oc`, or if you are using the Mac or Windows environments, use the [`openshift-tools-installer`](https://github.com/redhat-actions/openshift-tools-installer) action to install `oc` before running this action.
 
 ## Action inputs
 
