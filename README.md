@@ -10,10 +10,10 @@
 oc-new-app is a Github Action for deploying and exposing an application on Openshift.
 
 ## Prerequisites
-
-`oc` must be installed on the GitHub Action runner you specify.
-- Presently the [Ubuntu Environments](https://github.com/actions/virtual-environments#available-environments) come with `oc 4.7.0` installed.
-- If you want a different version of `oc`, or if you are using the Mac or Windows environments, use the [`openshift-tools-installer`](https://github.com/redhat-actions/openshift-tools-installer) action to install `oc` before running this action.
+- An Openshift Cluster is required. To try an OpenShift cluster, visit [try.openshift.com](https://try.openshift.com) or sign up for our [Developer Sandbox](https://developers.redhat.com/developer-sandbox).
+- `oc` must be installed on the GitHub Action runner you specify.
+    - Presently the [Ubuntu Environments](https://github.com/actions/virtual-environments#available-environments) come with `oc 4.7.0` installed.
+    - If you want a different version of `oc`, or if you are using the Mac or Windows environments, use the [`openshift-tools-installer`](https://github.com/redhat-actions/openshift-tools-installer) action to install `oc` before running this action.
 
 ## Action inputs
 

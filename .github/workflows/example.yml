@@ -37,7 +37,7 @@ jobs:
           insecure_skip_tls_verify: true
           namespace: ${{ env.TEST_NAMESPACE }}
 
-      # This step should create a deployment, service, and route to run your app and expose it to the internet.
+      # This step will create a deployment, service, and route to run your app and expose it to the internet.
       - name: Create and expose app
         id: oc-new-app
         uses: ./
