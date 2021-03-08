@@ -37,6 +37,7 @@ jobs:
           insecure_skip_tls_verify: true
           namespace: ${{ env.TEST_NAMESPACE }}
 
+      # This step will create a deployment, service, and route to run your app and expose it to the internet.
       - name: Create and expose app
         id: oc-new-app
         uses: ./
@@ -58,6 +59,8 @@ jobs:
           # Just check that the root endpoint returns a success status (-f flag).
           command: curl -sSfLi ${{ steps.oc-new-app.outputs.route }}
 
+      # Take down the created deployment
       - name: Delete deployment that was created
+        if: always()
         run:
           oc delete all --selector=${{ steps.oc-new-app.outputs.selector }}
