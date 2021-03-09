@@ -41,6 +41,7 @@ namespace Oc {
         Patch = "patch",
         Output = "output",
         JSONPath = "jsonpath",
+        Namespace = "namespace",
     }
 
     export type Options = { [key in Flags]?: string };

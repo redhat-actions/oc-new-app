@@ -10,6 +10,7 @@
 oc-new-app is a Github Action for deploying and exposing an application on Openshift.
 
 ## Prerequisites
+
 - An Openshift Cluster is required. To try an OpenShift cluster, visit [try.openshift.com](https://try.openshift.com) or sign up for our [Developer Sandbox](https://developers.redhat.com/developer-sandbox).
 - `oc` must be installed on the GitHub Action runner you specify.
     - Presently the [Ubuntu Environments](https://github.com/actions/virtual-environments#available-environments) come with `oc 4.7.0` installed.
@@ -21,6 +22,7 @@ oc-new-app is a Github Action for deploying and exposing an application on Opens
 | ----- | ----------- | ------- |
 | app_name | Name to use for the generated application artifacts | **Must be provided** |
 | image | The name (reference) of the image to create deployment | **Must be provided** |
+| namespace | Kubernetes namespace to target. Provided namespace should already be created in the cluster | Current context |
 | port | The port to use for the application | **Must be provided** |
 
 ## Action outputs
@@ -42,8 +44,9 @@ Before running this action, use [oc-login](https://github.com/redhat-actions/oc-
   uses: redhat-actions/oc-new-app@v1
   with:
     app_name: ${{ env.APP_NAME }}
-    port: ${{ env.APP_PORT }}
     image: ${{ env.IMAGE_PATH }}
+    namespace: ${{ env.NAMESPACE }}
+    port: ${{ env.APP_PORT }}
 ```
 To build and push the image to the desired registry, [buildah-build](https://github.com/redhat-actions/buildah-build)
 and [push-to-registry](https://github.com/redhat-actions/push-to-registry) action can be used accordingly.

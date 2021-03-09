@@ -6,19 +6,22 @@ branding:
   color: red
 inputs:
   app_name:
-    description: 'Name to use for generated application artifacts'
+    description: "Name to use for generated application artifacts"
     required: true
   image:
-    description: 'The name (reference) of the image to create deployment'
+    description: "The name (reference) of the image to create deployment"
     required: true
+  namespace:
+    description: "The Kubernetes Namespace to deploy to. Defaults to current context's namespace."
+    required: false
   port:
-    description: 'The port to use for the application'
+    description: "The port to use for the application"
     required: false
 outputs:
   route:
-    description: 'Service route of the deployed application'
+    description: "Service route of the deployed application"
   selector:
-    description: 'Selector to filer out the deployment'
+    description: "Selector to filer out the deployment"
 runs:
   using: 'node12'
   main: 'dist/index.js'

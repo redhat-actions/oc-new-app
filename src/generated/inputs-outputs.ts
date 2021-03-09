@@ -13,6 +13,12 @@ export enum Inputs {
      */
     IMAGE = "image",
     /**
+     * The Kubernetes Namespace to deploy to. Defaults to current context's namespace.
+     * Required: false
+     * Default: None.
+     */
+    NAMESPACE = "namespace",
+    /**
      * The port to use for the application
      * Required: false
      * Default: None.
