@@ -14,7 +14,7 @@ namespace Deploy {
      * @param image Image to create application from
      * @param namespace Namespace in which to create new app
      */
-    export async function newApp(appName: string, image: string, namespaceArg: string): Promise<void> {
+    export async function newApp(appName: string, image: string, namespaceArg?: string): Promise<void> {
         ghCore.info("⏳ Creating Deployment from image of the application...");
         const ocOptions = Oc.getOptions({ name: appName, "docker-image": image });
         const ocExecArgs = [ Oc.Commands.NewApp, ...ocOptions ];
@@ -29,7 +29,7 @@ namespace Deploy {
      * @param appSelector Selector to filter out deployment
      * @param namespace Namespace from which to delete deployment
      */
-    export async function deleteDeployment(appSelector: string, namespaceArg: string): Promise<void> {
+    export async function deleteDeployment(appSelector: string, namespaceArg?: string): Promise<void> {
         ghCore.info("🔍 Checking for old deployments and deleting if found...");
         const ocOptions = Oc.getOptions({ selector: appSelector });
         const ocExecArgs = [ Oc.Commands.Delete, Oc.SubCommands.All, ...ocOptions ];
@@ -45,7 +45,7 @@ namespace Deploy {
      * @param port Port to expose
      * @param namespace Namespace where service is created
      */
-    export async function patchSvc(appName: string, port: string, namespaceArg: string): Promise<void> {
+    export async function patchSvc(appName: string, port: string, namespaceArg?: string): Promise<void> {
         ghCore.info(`⏳ Patching service with the port ${port} ...`);
         const portInt = Number(port);
         const patchJson = {
@@ -73,7 +73,7 @@ namespace Deploy {
      * @param svcPort Port to expose
      * @param namespace Namespace where created app exists
      */
-    export async function exposeSvc(appName: string, svcPort: string, namespaceArg: string): Promise<void> {
+    export async function exposeSvc(appName: string, svcPort: string, namespaceArg?: string): Promise<void> {
         ghCore.info(`Exposing the route for ${appName} service...`);
         const ocOptions = Oc.getOptions({ port: svcPort });
         const ocExecArgs = [ Oc.Commands.Expose, Oc.SubCommands.Service, appName, ...ocOptions ];
@@ -88,7 +88,7 @@ namespace Deploy {
      * @param appSelector Selector to filter out the deployment
      * @param namespace Namespace in which to get the deployment
      */
-    export async function getDeployment(appSelector: string, namespaceArg: string): Promise<void> {
+    export async function getDeployment(appSelector: string, namespaceArg?: string): Promise<void> {
         ghCore.info("⏳ Verifying if deployment is created successfully...");
         const ocOptions = Oc.getOptions({ selector: appSelector });
         const ocExecArgs = [ Oc.Commands.Get, Oc.SubCommands.All, ...ocOptions ];
@@ -103,7 +103,7 @@ namespace Deploy {
      * @param appName Name of the app for which to find the route
      * @param namespace Namespace in which created app exists
      */
-    export async function getRoute(appName: string, namespaceArg: string): Promise<string> {
+    export async function getRoute(appName: string, namespaceArg?: string): Promise<string> {
         ghCore.info(`⏳ Fetching route of the ${appName} application...`);
         const jsonPath = "{.spec.host}";
         const outputOcOptions = Oc.getOptions({ output: "" });

@@ -18,7 +18,8 @@ async function run(): Promise<void> {
     const port = ghCore.getInput(Inputs.PORT);
 
     const appSelector = utils.getSelector(appName);
-    let namespaceArg = "";
+
+    let namespaceArg: string | undefined;
     if (namespace) {
         namespaceArg = `--namespace=${namespace}`;
     }
