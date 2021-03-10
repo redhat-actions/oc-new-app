@@ -7,11 +7,11 @@
 [![license badge](https://img.shields.io/github/license/redhat-actions/oc-new-app)](./LICENSE)
 [![size badge](https://img.shields.io/github/size/redhat-actions/oc-new-app/dist/index.js)](./dist)
 
-oc-new-app is a Github Action for deploying and exposing an application on Openshift.
+oc-new-app is a Github Action for deploying and exposing an application on OpenShift.
 
 ## Prerequisites
 
-- An Openshift Cluster is required. To try an OpenShift cluster, visit [try.openshift.com](https://try.openshift.com) or sign up for our [Developer Sandbox](https://developers.redhat.com/developer-sandbox).
+- An OpenShift Cluster is required. To try an OpenShift cluster, visit [try.openshift.com](https://try.openshift.com) or sign up for our [Developer Sandbox](https://developers.redhat.com/developer-sandbox).
 - `oc` must be installed on the GitHub Action runner you specify.
     - Presently the [Ubuntu Environments](https://github.com/actions/virtual-environments#available-environments) come with `oc 4.7.0` installed.
     - If you want a different version of `oc`, or if you are using the Mac or Windows environments, use the [`openshift-tools-installer`](https://github.com/redhat-actions/openshift-tools-installer) action to install `oc` before running this action.
@@ -22,7 +22,7 @@ oc-new-app is a Github Action for deploying and exposing an application on Opens
 | ----- | ----------- | ------- |
 | app_name | Name to use for the generated application artifacts | **Must be provided** |
 | image | The name (reference) of the image to create deployment | **Must be provided** |
-| namespace | Openshift project/ Kubernetes namespace to target | Current context |
+| namespace | OpenShift project/Kubernetes namespace to target | Current context |
 | port | The port to use for the application | **Must be provided** |
 
 ## Action outputs
@@ -35,9 +35,9 @@ oc-new-app is a Github Action for deploying and exposing an application on Opens
 ## Example
 
 The example below shows how the `oc-new-app` action can be used to deploy and expose a
-application on Openshift.
+application on OpenShift.
 
-Before running this action, use [oc-login](https://github.com/redhat-actions/oc-login) to login into your Openshift cluster.
+Before running this action, use [oc-login](https://github.com/redhat-actions/oc-login) to login into your OpenShift cluster.
 
 ```yaml
 - name: Create and expose app

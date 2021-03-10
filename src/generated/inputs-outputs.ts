@@ -13,7 +13,7 @@ export enum Inputs {
      */
     IMAGE = "image",
     /**
-     * The Openshift project/ Kubernetes namespace to deploy to. Defaults to current context's.
+     * The OpenShift project/Kubernetes namespace to deploy to. Defaults to current context's.
      * Required: false
      * Default: None.
      */
