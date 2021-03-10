@@ -22,7 +22,7 @@ oc-new-app is a Github Action for deploying and exposing an application on Opens
 | ----- | ----------- | ------- |
 | app_name | Name to use for the generated application artifacts | **Must be provided** |
 | image | The name (reference) of the image to create deployment | **Must be provided** |
-| namespace | Kubernetes namespace to target. Provided namespace should already be created in the cluster | Current context |
+| namespace | Openshift project/ Kubernetes namespace to target | Current context |
 | port | The port to use for the application | **Must be provided** |
 
 ## Action outputs
@@ -30,7 +30,7 @@ oc-new-app is a Github Action for deploying and exposing an application on Opens
 | Output | Description |
 | ------ | ----------- |
 | route | Service route of the deployed application |
-| selector | Selector to filer out the deployment |
+| selector | Selector to filter out the deployment |
 
 ## Example
 
