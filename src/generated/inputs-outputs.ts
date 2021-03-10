@@ -13,7 +13,7 @@ export enum Inputs {
      */
     IMAGE = "image",
     /**
-     * The Kubernetes Namespace to deploy to. Defaults to current context's namespace.
+     * The OpenShift project/Kubernetes namespace to deploy to. Defaults to current context's.
      * Required: false
      * Default: None.
      */
@@ -34,7 +34,7 @@ export enum Outputs {
      */
     ROUTE = "route",
     /**
-     * Selector to filer out the deployment
+     * Selector to filter out the deployment
      * Required: false
      * Default: None.
      */
