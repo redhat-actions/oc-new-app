@@ -9,12 +9,16 @@
 
 oc-new-app is a Github Action for deploying and exposing an application on OpenShift.
 
+<a id="prerequisites"></a>
+
 ## Prerequisites
 
 - An OpenShift Cluster is required. To try an OpenShift cluster, visit [try.openshift.com](https://try.openshift.com) or sign up for our [Developer Sandbox](https://developers.redhat.com/developer-sandbox).
 - `oc` must be installed on the GitHub Action runner you specify.
     - Presently the [Ubuntu Environments](https://github.com/actions/virtual-environments#available-environments) come with `oc 4.7.0` installed.
     - If you want a different version of `oc`, or if you are using the Mac or Windows environments, use the [`openshift-tools-installer`](https://github.com/redhat-actions/openshift-tools-installer) action to install `oc` before running this action.
+
+<a id="action-inputs"></a>
 
 ## Action inputs
 
@@ -25,12 +29,16 @@ oc-new-app is a Github Action for deploying and exposing an application on OpenS
 | namespace | OpenShift project/Kubernetes namespace to target | Current context |
 | port | The port to use for the application | **Must be provided** |
 
+<a id="action-outputs"></a>
+
 ## Action outputs
 
 | Output | Description |
 | ------ | ----------- |
 | route | Service route of the deployed application |
 | selector | Selector to filter out the deployment |
+
+<a id="example"></a>
 
 ## Example
 
@@ -63,3 +71,9 @@ For example:
 - name: Log in to Quay.io
   run: echo "${{ secrets.QUAY_IO_PASSWORD }}" | docker login quay.io -u "${{ secrets.QUAY_IO_USER }}" --password-stdin
 ```
+
+## Troubleshooting
+
+Note that `quay.io` repositories are private by default.
+
+This means that if you push an image for the first time, you will have to authenticate before pulling it, or go to the repository's settings and change its visibility.
