@@ -114,8 +114,9 @@ namespace Deploy {
         if (namespaceArg) {
             ocExecArgs.push(namespaceArg);
         }
+
         const execResult = await Oc.exec(ocExecArgs);
-        return execResult.out;
+        return execResult.out.trim();
     }
 }
 
