@@ -47,6 +47,10 @@ jobs:
           namespace: ${{ env.TEST_NAMESPACE }}
           port: ${{ env.APP_PORT }}
 
+      - name: Echo outputs
+        run: |
+          echo "${{ toJSON(steps.oc-new-app.outputs) }}"
+
       # Perform a (very) basic integration test.
       # This step is retried since the time to pull the image and start the pod can vary.
       - name: Test project is running
@@ -60,8 +64,7 @@ jobs:
           # Just check that the root endpoint returns a success status (-f flag).
           command: curl -sSfLi ${{ steps.oc-new-app.outputs.route }}
 
-      # Take down the created deployment
-      - name: Delete deployment that was created
+      - name: Tear down
         if: always()
         run:
           oc delete all --selector=${{ steps.oc-new-app.outputs.selector }} -n ${{ env.TEST_NAMESPACE }}
