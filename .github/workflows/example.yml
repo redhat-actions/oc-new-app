@@ -1,9 +1,13 @@
 name: OpenShift Pet Clinic Workflow
-on: [ push, workflow_dispatch ]
+on:
+  push:
+  workflow_dispatch:
+  schedule:
+    - cron: '0 0 * * *'  # every day at midnight
 
 env:
   IMAGE_PATH: quay.io/diagrawa/petclinic:latest
-  TEST_NAMESPACE: diagrawa-code
+  TEST_NAMESPACE: github-actions-bot-dev
   APP_NAME: petclinic
   APP_PORT: 8080
 
@@ -30,7 +34,7 @@ jobs:
       - name: OpenShift login
         uses: redhat-actions/oc-login@v1
         with:
-          openshift_server_url: ${{ secrets.OPENSHIFT_SERVER }}
+          openshift_server_url: ${{ secrets.OPENSHIFT_URL }}
           openshift_token: ${{ secrets.OPENSHIFT_TOKEN }}
           # openshift_username:
           # openshift_password:
