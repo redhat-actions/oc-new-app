@@ -67,7 +67,7 @@ For a complete example see the [example workflow](.github/workflows/example.yml)
 
 ## Using private images
 
-If your deployment requires private image, use [**podman-login**](https://github.com/redhat-actions/podman-login) action in a step before running this action to authenticate to the container image registry.
+If your deployment requires a private image, run [**podman-login**](https://github.com/redhat-actions/podman-login) in a step before this action so you can pull the image.
 
 For example:
 
