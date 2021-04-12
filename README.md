@@ -67,13 +67,17 @@ For a complete example see the [example workflow](.github/workflows/example.yml)
 
 ## Using private images
 
-If your deployment requires private image, you have to `docker login` in a step before running this action.
+If your deployment requires a private image, run [**podman-login**](https://github.com/redhat-actions/podman-login) in a step before this action so you can pull the image.
 
 For example:
 
 ```yaml
-- name: Log in to Quay.io
-  run: echo "${{ secrets.QUAY_IO_PASSWORD }}" | docker login quay.io -u "${{ secrets.QUAY_IO_USER }}" --password-stdin
+- name: Log in to quay.io
+  uses: redhat-action/podman-login@v1
+  with:
+    registry: quay.io
+    username: quayuser
+    password: {{ secrets.REGISTRY_PASSWORD }}
 ```
 
 ## Troubleshooting
