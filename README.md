@@ -65,21 +65,6 @@ and [**push-to-registry**](https://github.com/redhat-actions/push-to-registry) a
 
 For a complete example see the [example workflow](.github/workflows/example.yml).
 
-## Using private images
-
-If your deployment requires a private image, run [**podman-login**](https://github.com/redhat-actions/podman-login) in a step before this action so you can pull the image.
-
-For example:
-
-```yaml
-- name: Log in to quay.io
-  uses: redhat-action/podman-login@v1
-  with:
-    registry: quay.io
-    username: quayuser
-    password: {{ secrets.REGISTRY_PASSWORD }}
-```
-
 ## Troubleshooting
 
 Note that [quay.io](https://quay.io) repositories are private by default.
