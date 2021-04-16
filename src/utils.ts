@@ -3,6 +3,7 @@
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *************************************************************************************************/
 import * as ghCore from "@actions/core";
+import { promises as fs } from "fs";
 
 type OS = "linux" | "macos" | "windows";
 
@@ -31,4 +32,14 @@ export function getOS(): OS {
 
 export function getSelector(appName: string): string {
     return `app=${appName}`;
+}
+
+export async function fileExists(filePath: string): Promise<boolean> {
+    try {
+        await fs.access(filePath);
+        return true;
+    }
+    catch (err) {
+        return false;
+    }
 }

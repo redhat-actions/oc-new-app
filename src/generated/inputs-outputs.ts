@@ -7,6 +7,12 @@ export enum Inputs {
      */
     APP_NAME = "app_name",
     /**
+     * Auth file from which to create pull secret, accepted values are 'docker' and 'podman'
+     * Required: false
+     * Default: None.
+     */
+    CREATE_PULL_SECRET_FROM = "create_pull_secret_from",
+    /**
      * The name (reference) of the image to create deployment
      * Required: true
      * Default: None.
@@ -24,6 +30,24 @@ export enum Inputs {
      * Default: None.
      */
     PORT = "port",
+    /**
+     * The Hostname/domain of the container image registry such as quay.io, docker.io. to create pull secret
+     * Required: false
+     * Default: None.
+     */
+    REGISTRY = "registry",
+    /**
+     * Password, encrypted password, or access token of the provided registry
+     * Required: false
+     * Default: None.
+     */
+    REGISTRY_PASSWORD = "registry_password",
+    /**
+     * Registry username to create pull secret
+     * Required: false
+     * Default: None.
+     */
+    REGISTRY_USERNAME = "registry_username",
 }
 
 export enum Outputs {

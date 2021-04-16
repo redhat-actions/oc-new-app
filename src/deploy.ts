@@ -118,6 +118,99 @@ namespace Deploy {
         const execResult = await Oc.exec(ocExecArgs);
         return execResult.out.trim();
     }
+
+    export async function createPullSecretFromFile(
+        pullSecretName: string, authFilePath: string, namespaceArg?: string
+    ): Promise<void> {
+        // Deleting any old secret with the same name
+        await deletePullSecret(pullSecretName, namespaceArg);
+
+        ghCore.info(`⏳ Creating pull secret using auth file present at ${authFilePath}.`);
+        const ocOptions = Oc.getOptions({
+            "from-file": `.dockerconfigjson=${authFilePath}`, type: "kubernetes.io/dockerconfigjson",
+        });
+        const ocExecArgs = [
+            Oc.Commands.Create, Oc.SubCommands.Secret, "generic", pullSecretName, ...ocOptions,
+        ];
+        if (namespaceArg) {
+            ocExecArgs.push(namespaceArg);
+        }
+
+        await Oc.exec(ocExecArgs);
+    }
+
+    export async function createPullSecretFromCreds(
+        pullSecretName: string, registryServer: string, registryUsername: string,
+        registryPassword: string, namespaceArg?: string
+    ): Promise<void> {
+        // Deleting any old secret with the same name
+        await deletePullSecret(pullSecretName, namespaceArg);
+
+        ghCore.info(`⏳ Creating pull secret using provided image registry credentials...`);
+        const ocOptions = Oc.getOptions({
+            "docker-server": registryServer, "docker-username": registryUsername, "docker-password": registryPassword,
+        });
+        const ocExecArgs = [
+            Oc.Commands.Create, Oc.SubCommands.Secret, "docker-registry", pullSecretName, ...ocOptions,
+        ];
+
+        if (namespaceArg) {
+            ocExecArgs.push(namespaceArg);
+        }
+
+        await Oc.exec(ocExecArgs);
+    }
+
+    export async function linkSecretToServiceAccount(pullSecretName: string, namespaceArg?: string): Promise<void> {
+        const defaultServiceAccount = "default";
+        ghCore.info(`🔗 Linking secret to the service account "${defaultServiceAccount}"...`);
+        const ocOptions = Oc.getOptions({ for: "pull" });
+        const ocExecArgs = [
+            Oc.Commands.Secrets, Oc.SubCommands.Link, defaultServiceAccount, pullSecretName, ...ocOptions,
+        ];
+
+        if (namespaceArg) {
+            ocExecArgs.push(namespaceArg);
+        }
+
+        await Oc.exec(ocExecArgs);
+    }
+
+    export async function deletePullSecret(pullSecretName: string, namespaceArg?: string): Promise<void> {
+        ghCore.info(`🔍 Checking if secret ${pullSecretName} exists or not`);
+        if (await checkSecret(pullSecretName, namespaceArg)) {
+            ghCore.info(`Secret ${pullSecretName} exists, deleting secret...`);
+            const ocExecArgs = [
+                Oc.Commands.Delete, Oc.SubCommands.Secret, pullSecretName,
+            ];
+            if (namespaceArg) {
+                ocExecArgs.push(namespaceArg);
+            }
+
+            await Oc.exec(ocExecArgs);
+        }
+        else {
+            ghCore.info(`Secret ${pullSecretName} doesn't exist`);
+        }
+    }
+
+    async function checkSecret(pullSecretName: string, namespaceArg?: string): Promise<boolean> {
+        const ocExecArgs = [
+            Oc.Commands.Get, Oc.SubCommands.Secret, pullSecretName,
+        ];
+        if (namespaceArg) {
+            ocExecArgs.push(namespaceArg);
+        }
+        try {
+            await Oc.exec(ocExecArgs, { group: true });
+            return true;
+        }
+        catch (error) {
+            ghCore.debug(error);
+        }
+
+        return false;
+    }
 }
 
 export default Deploy;

@@ -5,6 +5,7 @@
 
 import * as os from "os";
 import * as ghExec from "@actions/exec";
+import * as ghCore from "@actions/core";
 import * as util from "./utils";
 
 const EXECUTABLE = util.getOS() === "windows" ? "oc.exe" : "oc";
@@ -19,6 +20,8 @@ namespace Oc {
         Patch = "patch",
         Expose = "expose",
         Get = "get",
+        Create = "create",
+        Secrets = "secrets",
     }
 
     /**
@@ -28,6 +31,8 @@ namespace Oc {
         All = "all",
         Service = "service",
         Route = "route",
+        Secret = "secret",
+        Link = "link",
     }
 
     /**
@@ -42,6 +47,12 @@ namespace Oc {
         Output = "output",
         JSONPath = "jsonpath",
         Namespace = "namespace",
+        FromFile = "from-file",
+        Type = "type",
+        For = "for",
+        DockerServer = "docker-server",
+        DockerUsername = "docker-username",
+        DockerPassword = "docker-password",
     }
 
     export type Options = { [key in Flags]?: string };
@@ -81,7 +92,8 @@ namespace Oc {
      * @returns Exit code and the contents of stdout/stderr.
      */
     export async function exec(
-        args: string[], execOptions: ghExec.ExecOptions = {}
+        args: string[],
+        execOptions: ghExec.ExecOptions & { group?: boolean } = {}
     ):Promise<{ exitCode: number, out: string, err: string }> {
         // ghCore.info(`${EXECUTABLE} ${args.join(" ")}`)
 
@@ -100,21 +112,34 @@ namespace Oc {
             },
         };
 
-        const exitCode = await ghExec.exec(EXECUTABLE, args, finalExecOptions);
-
-        if (execOptions.ignoreReturnCode !== true && exitCode !== 0) {
-            // Throwing the stderr as part of the Error makes the stderr show up in the action outline,
-            // which saves some clicking when debugging.
-            let error = `oc exited with code ${exitCode}`;
-            if (stderr) {
-                error += `\n${stderr}`;
-            }
-            throw new Error(error);
+        if (execOptions.group) {
+            const groupName = [ EXECUTABLE, ...args ].join(" ");
+            ghCore.startGroup(groupName);
         }
 
-        return {
-            exitCode, out: stdout, err: stderr,
-        };
+        try {
+            const exitCode = await ghExec.exec(EXECUTABLE, args, finalExecOptions);
+
+            if (execOptions.ignoreReturnCode !== true && exitCode !== 0) {
+                // Throwing the stderr as part of the Error makes the stderr show up in the action outline,
+                // which saves some clicking when debugging.
+                let error = `oc exited with code ${exitCode}`;
+                if (stderr) {
+                    error += `\n${stderr}`;
+                }
+                throw new Error(error);
+            }
+
+            return {
+                exitCode, out: stdout, err: stderr,
+            };
+        }
+
+        finally {
+            if (execOptions.group) {
+                ghCore.endGroup();
+            }
+        }
     }
 
 }
