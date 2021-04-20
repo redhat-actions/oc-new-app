@@ -25,7 +25,7 @@ async function run(): Promise<void> {
     const namespace = ghCore.getInput(Inputs.NAMESPACE);
     const port = ghCore.getInput(Inputs.PORT);
     const createPullSecretFrom = ghCore.getInput(Inputs.CREATE_PULL_SECRET_FROM);
-    const registry = ghCore.getInput(Inputs.REGISTRY);
+    const registry = ghCore.getInput(Inputs.REGISTRY_HOSTNAME);
     const registryUsername = ghCore.getInput(Inputs.REGISTRY_USERNAME);
     const registryPassword = ghCore.getInput(Inputs.REGISTRY_PASSWORD);
 

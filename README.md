@@ -30,13 +30,13 @@ It creates a Deployment which runs the application Pod, and then exposes that po
 | Input | Description | Default |
 | ----- | ----------- | ------- |
 | app_name | Name to use for the generated application artifacts | **Must be provided** |
-| create_pull_secret_from | Auth file from which to create pull secret, accepted values are `docker` and `podman`. See [note](#using-private-images) on using private images | None
+| create_pull_secret_from | Registry credentials file to use to create a pull secret. Set this to `docker` or `podman` depending on which tool you used to log in. See [note](#using-private-images) on using private images | None
 | image | The fully qualified name of the application image | **Must be provided** |
 | namespace | OpenShift project/Kubernetes namespace to target | Current context |
 | port | The port to expose from the application container | **Must be provided** |
-| registry | The Hostname/domain of the container image registry such as quay.io, docker.io. to create pull secret | None
-| registry_username | Registry username to create pull secret | None
-| registry_password | Password, encrypted password, or access token of the provided registry | None
+| registry_hostname | The Hostname/domain of the container image registry such as quay.io, docker.io. to create pull secret | None
+| registry_username | Registry username to use for the pull secret | None
+| registry_password | Password, encrypted password, or access token of the provided registry to use for the pull secret | None
 
 <a id="action-outputs"></a>
 
@@ -76,9 +76,9 @@ For a complete example see the [example workflow](.github/workflows/example.yml)
 If your deployment requires a private image, this action will create an [image pull secret](https://docs.openshift.com/container-platform/4.2/openshift_images/managing_images/using-image-pull-secrets.html#images-allow-pods-to-reference-images-from-secure-registries_using-image-pull-secrets) which will allow
 to reference image from secured registries.
 
-If you have already logged in to container image registry, input `create_pull_secret_from` is to specify the container runtime you have used to log in to container registry, valid inputs are `docker` and `podman`. This will create a pull secret using the auth file of the respective container runtimes and link the created secret to `default` service account.
+If you have already logged in to container image registry, input `create_pull_secret_from` is to specify the tool you have used to log in to container registry so that credentials file is picked up accordingly to setup pull secret, set this input to `docker` or `podman` depending upon the tool you used. This will create a pull secret using the credentials file and link the created secret to `default` service account.
 
-Otherwise, if you haven't already logged in to the container image registry, provide inputs `registry`, `registry_username` and `registry_password` with the required credentials and this action will create the pull secret and link it to "default" service account.
+Otherwise, if you haven't already logged in to the container image registry, set inputs `registry_hostname`, `registry_username` and `registry_password` with your registry details and this action will create the pull secret and link it to `default` service account.
 
 ## Troubleshooting
 

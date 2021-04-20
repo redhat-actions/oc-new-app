@@ -7,7 +7,8 @@ export enum Inputs {
      */
     APP_NAME = "app_name",
     /**
-     * Auth file from which to create pull secret, accepted values are 'docker' and 'podman'
+     * "Registry credentials file to use to create a pull secret.
+     * Set this to "docker" or "podman" depending on which tool you used to log in"
      * Required: false
      * Default: None.
      */
@@ -35,15 +36,15 @@ export enum Inputs {
      * Required: false
      * Default: None.
      */
-    REGISTRY = "registry",
+    REGISTRY_HOSTNAME = "registry_hostname",
     /**
-     * Password, encrypted password, or access token of the provided registry
+     * Password, encrypted password, or access token of the provided registry to use for the pull secret
      * Required: false
      * Default: None.
      */
     REGISTRY_PASSWORD = "registry_password",
     /**
-     * Registry username to create pull secret
+     * Registry username to use for the pull secret
      * Required: false
      * Default: None.
      */

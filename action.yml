@@ -9,7 +9,9 @@ inputs:
     description: "Name to use for generated application artifacts"
     required: true
   create_pull_secret_from:
-    description: "Auth file from which to create pull secret, accepted values are 'docker' and 'podman'"
+    description: |
+      "Registry credentials file to use to create a pull secret.
+      Set this to "docker" or "podman" depending on which tool you used to log in"
     required: false
   image:
     description: "The name (reference) of the image to create deployment"
@@ -20,14 +22,14 @@ inputs:
   port:
     description: "The port to use for the application"
     required: false
-  registry:
+  registry_hostname:
     description: "The Hostname/domain of the container image registry such as quay.io, docker.io. to create pull secret"
     required: false
   registry_username:
-    description: "Registry username to create pull secret"
+    description: "Registry username to use for the pull secret"
     required: false
   registry_password:
-    description: "Password, encrypted password, or access token of the provided registry"
+    description: "Password, encrypted password, or access token of the provided registry to use for the pull secret"
     required: false
 
 outputs:
