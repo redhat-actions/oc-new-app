@@ -80,6 +80,9 @@ If you have already logged in to container image registry, input `create_pull_se
 
 Otherwise, if you haven't already logged in to the container image registry, set inputs `registry_hostname`, `registry_username` and `registry_password` with your registry details and this action will create the pull secret and link it to `default` service account.
 
+Image pull secrets will be created with label `app.kubernetes.io/managed-by=oc-new-app-action`, so that any
+existing secrets with the same name won't get deleted.
+
 ## Troubleshooting
 
 Note that [quay.io](https://quay.io) repositories are private by default.

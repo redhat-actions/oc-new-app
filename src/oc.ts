@@ -22,6 +22,7 @@ namespace Oc {
         Get = "get",
         Create = "create",
         Secrets = "secrets",
+        Label = "label",
     }
 
     /**

@@ -115,7 +115,9 @@ run()
     .then(() => {
         ghCore.info("Success.");
     })
-    .catch(ghCore.setFailed)
+    .catch((err) => {
+        ghCore.setFailed(err.message);
+    })
     .finally(async () => {
         if (isPullSecretCreated) {
             await Deploy.deletePullSecret(pullSecretName, namespaceArg);

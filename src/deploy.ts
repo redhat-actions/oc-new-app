@@ -137,6 +137,10 @@ namespace Deploy {
         }
 
         await Oc.exec(ocExecArgs);
+
+        // Add label to uniquely identify this secret
+        const labelToAdd = "app.kubernetes.io/managed-by=oc-new-app-action";
+        await addLabelToSecret(pullSecretName, labelToAdd, namespaceArg);
     }
 
     export async function createPullSecretFromCreds(
@@ -159,6 +163,9 @@ namespace Deploy {
         }
 
         await Oc.exec(ocExecArgs);
+
+        const labelToAdd = "app.kubernetes.io/managed-by=oc-new-app-action";
+        await addLabelToSecret(pullSecretName, labelToAdd, namespaceArg);
     }
 
     export async function linkSecretToServiceAccount(pullSecretName: string, namespaceArg?: string): Promise<void> {
@@ -177,9 +184,12 @@ namespace Deploy {
     }
 
     export async function deletePullSecret(pullSecretName: string, namespaceArg?: string): Promise<void> {
-        ghCore.info(`🔍 Checking if secret ${pullSecretName} exists or not`);
-        if (await checkSecret(pullSecretName, namespaceArg)) {
-            ghCore.info(`Secret ${pullSecretName} exists, deleting secret...`);
+        const labelToCheck = "app.kubernetes.io/managed-by=oc-new-app-action";
+
+        ghCore.info(`🔍 Checking if secret "${pullSecretName}" with label "${labelToCheck}" exists or not`);
+
+        if (await checkSecret(pullSecretName, labelToCheck, namespaceArg)) {
+            ghCore.info(`Secret "${pullSecretName}" with label "${labelToCheck}" exists, deleting secret...`);
             const ocExecArgs = [
                 Oc.Commands.Delete, Oc.SubCommands.Secret, pullSecretName,
             ];
@@ -190,23 +200,44 @@ namespace Deploy {
             await Oc.exec(ocExecArgs);
         }
         else {
-            ghCore.info(`Secret ${pullSecretName} doesn't exist`);
+            ghCore.info(`Secret "${pullSecretName}" with label "${labelToCheck}" doesn't exist`);
         }
     }
 
-    async function checkSecret(pullSecretName: string, namespaceArg?: string): Promise<boolean> {
+    async function addLabelToSecret(
+        pullSecretName: string, labelToAdd: string, namespaceArg?: string
+    ): Promise<void> {
+        ghCore.info(`Adding label "${labelToAdd}" to secret "${pullSecretName}"`);
         const ocExecArgs = [
-            Oc.Commands.Get, Oc.SubCommands.Secret, pullSecretName,
+            Oc.Commands.Label, Oc.SubCommands.Secret, pullSecretName, labelToAdd,
         ];
+
         if (namespaceArg) {
             ocExecArgs.push(namespaceArg);
         }
-        try {
-            await Oc.exec(ocExecArgs, { group: true });
-            return true;
+
+        await Oc.exec(ocExecArgs);
+    }
+
+    async function checkSecret(pullSecretName: string, labelToCheck: string, namespaceArg?: string): Promise<boolean> {
+        const jsonPath = "{.items[*].metadata.name}";
+        const ocOptions = Oc.getOptions({ selector: labelToCheck, output: "" });
+
+        const ocExecArgs = [
+            Oc.Commands.Get, Oc.SubCommands.Secret, ...ocOptions, `jsonpath=${jsonPath}{"\\n"}`,
+        ];
+
+        if (namespaceArg) {
+            ocExecArgs.push(namespaceArg);
         }
-        catch (error) {
-            ghCore.debug(error);
+        const execResult = await Oc.exec(ocExecArgs);
+
+        const secretsList = execResult.out.trim().split(" ");
+
+        for (const secret of secretsList) {
+            if (secret === pullSecretName) {
+                return true;
+            }
         }
 
         return false;
