@@ -215,13 +215,15 @@ namespace Deploy {
             return true;
         }
         catch (error) {
-            ghCore.debug(error);
+            ghCore.info(error);
         }
 
         return false;
     }
 
     async function checkPullSecretWithLabel(pullSecretName: string, namespaceArg?: string): Promise<boolean> {
+        let secretExists = false;
+
         ghCore.info(`🔎 Checking if secret "${pullSecretName}" with label "${secretLabel}" exists`);
         const jsonPath = "{.items[*].metadata.name}";
         const ocOptions = Oc.getOptions({ selector: secretLabel, output: "" });
@@ -234,16 +236,10 @@ namespace Deploy {
             ocExecArgs.push(namespaceArg);
         }
         const execResult = await Oc.exec(ocExecArgs);
-
         const secretsList = execResult.out.trim().split(" ");
+        secretExists = secretsList.some((secretName) => secretName === pullSecretName);
 
-        for (const secret of secretsList) {
-            if (secret === pullSecretName) {
-                return true;
-            }
-        }
-
-        return false;
+        return secretExists;
     }
 
     export async function deletePullSecretWithLabel(pullSecretName: string, namespaceArg?: string): Promise<void> {

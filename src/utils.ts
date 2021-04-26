@@ -43,3 +43,15 @@ export async function fileExists(filePath: string): Promise<boolean> {
         return false;
     }
 }
+
+export function getNamespaceArg(namespace: string): string {
+    let namespaceArg = "";
+    if (namespace) {
+        namespaceArg = `--namespace=${namespace}`;
+    }
+    else {
+        ghCore.info(`No namespace provided`);
+    }
+
+    return namespaceArg;
+}
