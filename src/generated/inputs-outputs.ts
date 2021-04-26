@@ -20,6 +20,13 @@ export enum Inputs {
      */
     IMAGE = "image",
     /**
+     * "In the case of private images, provide the image pull secret if you have already created that.
+     * Otherwise, provide inputs create_pull_secret_from or registry_hostname, registry_username and registry_password"
+     * Required: false
+     * Default: None.
+     */
+    IMAGE_PULL_SECRET_NAME = "image_pull_secret_name",
+    /**
      * The OpenShift project/Kubernetes namespace to deploy to. Defaults to current context's.
      * Required: false
      * Default: None.

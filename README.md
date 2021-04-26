@@ -30,11 +30,12 @@ It creates a Deployment which runs the application Pod, and then exposes that po
 | Input | Description | Default |
 | ----- | ----------- | ------- |
 | app_name | Name to use for the generated application artifacts | **Must be provided** |
-| create_pull_secret_from | Registry credentials file to use to create a pull secret. Set this to `docker` or `podman` depending on which tool you used to log in. See [note](#using-private-images) on using private images | None
+| create_pull_secret_from | Registry credentials file to use to create a pull secret. Set this to `docker` or `podman` depending on which tool you used to log in. See [using-private-images](#using-private-images) | None
 | image | The fully qualified name of the application image | **Must be provided** |
+| image_pull_secret_name | In the case of private images, provide the image pull secret name if you have already created that. Otherwise, see [using-private-images](#using-private-images) | None
 | namespace | OpenShift project/Kubernetes namespace to target | Current context |
 | port | The port to expose from the application container | **Must be provided** |
-| registry_hostname | The Hostname/domain of the container image registry such as quay.io, docker.io. to create pull secret | None
+| registry_hostname | The Hostname/domain of the container image registry such as quay.io, or docker.io that a private container image will be pulled from. The pull secret is used to access this registry. See [using-private-images](#using-private-images) | None
 | registry_username | Registry username to use for the pull secret | None
 | registry_password | Password, encrypted password, or access token of the provided registry to use for the pull secret | None
 
@@ -73,15 +74,19 @@ For a complete example see the [example workflow](.github/workflows/example.yml)
 
 ## Using private images
 
-If your deployment requires a private image, this action will create an [image pull secret](https://docs.openshift.com/container-platform/4.2/openshift_images/managing_images/using-image-pull-secrets.html#images-allow-pods-to-reference-images-from-secure-registries_using-image-pull-secrets) which will allow
-to reference image from secured registries.
+If your deployment requires a private image, this action will create an [image pull secret](https://docs.openshift.com/container-platform/4.7/openshift_images/managing_images/using-image-pull-secrets.html#images-allow-pods-to-reference-images-from-secure-registries_using-image-pull-secrets) which will allow
+to reference image from secured registries. Use one of the methods given below to setup image pull secret:
 
-If you have already logged in to container image registry, input `create_pull_secret_from` is to specify the tool you have used to log in to container registry so that credentials file is picked up accordingly to setup pull secret, set this input to `docker` or `podman` depending upon the tool you used. This will create a pull secret using the credentials file and link the created secret to `default` service account.
+- If you have already created the secret, use the `image_pull_secret_name` input to specify the name of the created pull secret. Make sure that secret is created in the namespace in which you want to create the deployment.
 
-Otherwise, if you haven't already logged in to the container image registry, set inputs `registry_hostname`, `registry_username` and `registry_password` with your registry details and this action will create the pull secret and link it to `default` service account.
+- If you have already logged in to a container image registry, use the `create_pull_secret_from` input to specify the tool you used to log in. This input tells the action where to find the credentials file to use to setup the pull secret.
+Set `create_pull_secret_from` to `docker` or `podman` depending on which of those two tools you used to log in. This will create a pull secret using the credentials file.
 
-Image pull secrets will be created with label `app.kubernetes.io/managed-by=oc-new-app-action`, so that any
-existing secrets with the same name won't get deleted.
+- If you haven't already logged in to the container image registry, set inputs `registry_hostname`, `registry_username` and `registry_password` with your registry details and this action will create the pull secret.
+
+Finally, created pull secret will be linked to the `default` service account.
+
+Any image pull secrets created will be provided with the label `app.kubernetes.io/managed-by=oc-new-app-action`, and once this action finish it's execution created secret will be cleaned up from the cluster.
 
 ## Troubleshooting
 
