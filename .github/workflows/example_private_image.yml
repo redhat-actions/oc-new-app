@@ -1,0 +1,217 @@
+name: Deploy application using private image
+on:
+  push:
+  workflow_dispatch:
+  schedule:
+    - cron: '0 0 * * *'  # every day at midnight
+
+env:
+  IMAGE_PATH: quay.io/redhat-github-actions/petclinic-private:latest
+  TEST_NAMESPACE: github-actions-bot-dev
+  APP_NAME: petclinic
+  APP_PORT: 8080
+  PULL_SECRET_NAME: registry-pull-secret
+  REGISTRY_USERNAME: redhat-github-actions+redhat_actions_ci_puller
+
+jobs:
+  using-docker-auth-file:
+    name: Create secret using Docker auth file
+    runs-on: ubuntu-20.04
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: OpenShift login
+        uses: redhat-actions/oc-login@v1
+        with:
+          openshift_server_url: ${{ secrets.OPENSHIFT_URL }}
+          openshift_token: ${{ secrets.OPENSHIFT_TOKEN }}
+          insecure_skip_tls_verify: true
+          namespace: ${{ env.TEST_NAMESPACE }}
+
+      - name: Docker login
+        run: |
+          echo "${{ secrets.REGISTRY_PASSWORD }}" | docker login quay.io -u "${{ env.REGISTRY_USERNAME }}" --password-stdin
+
+      # This step will create a deployment, service, and route to run your app and expose it to the internet.
+      - name: Create and expose app
+        id: oc-new-app
+        uses: ./
+        with:
+          app_name: ${{ env.APP_NAME }}-docker-method
+          image: ${{ env.IMAGE_PATH }}
+          namespace: ${{ env.TEST_NAMESPACE }}
+          port: ${{ env.APP_PORT }}
+          create_pull_secret_from: docker
+
+      - name: Echo outputs
+        run: |
+          echo "${{ toJSON(steps.oc-new-app.outputs) }}"
+
+      # Perform a (very) basic integration test.
+      # This step is retried since the time to pull the image and start the pod can vary.
+      - name: Test project is running
+        id: test-project
+        uses: nick-invision/retry@v2.2.0
+        with:
+          timeout_seconds: 3
+          retry_wait_seconds: 10
+          max_attempts: 30
+          warning_on_retry: false
+          # Just check that the root endpoint returns a success status (-f flag).
+          command: curl -sSfLi ${{ steps.oc-new-app.outputs.route }}
+
+      - name: Tear down
+        if: always()
+        run:
+          oc delete all --selector=${{ steps.oc-new-app.outputs.selector }} -n ${{ env.TEST_NAMESPACE }}
+
+  using-podman-auth-file:
+    needs: using-docker-auth-file
+    name: Create secret using Podman auth file
+    runs-on: ubuntu-20.04
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: OpenShift login
+        uses: redhat-actions/oc-login@v1
+        with:
+          openshift_server_url: ${{ secrets.OPENSHIFT_URL }}
+          openshift_token: ${{ secrets.OPENSHIFT_TOKEN }}
+          insecure_skip_tls_verify: true
+          namespace: ${{ env.TEST_NAMESPACE }}
+
+      - name: Podman login
+        uses: redhat-actions/podman-login@v1
+        with:
+          registry: quay.io
+          username: ${{ env.REGISTRY_USERNAME }}
+          password: ${{ secrets.REGISTRY_PASSWORD }}
+
+      # This step will create a deployment, service, and route to run your app and expose it to the internet.
+      - name: Create and expose app
+        id: oc-new-app
+        uses: ./
+        with:
+          app_name: ${{ env.APP_NAME }}-podman-method
+          image: ${{ env.IMAGE_PATH }}
+          namespace: ${{ env.TEST_NAMESPACE }}
+          port: ${{ env.APP_PORT }}
+          create_pull_secret_from: podman
+
+      - name: Echo outputs
+        run: |
+          echo "${{ toJSON(steps.oc-new-app.outputs) }}"
+
+      # Perform a (very) basic integration test.
+      # This step is retried since the time to pull the image and start the pod can vary.
+      - name: Test project is running
+        id: test-project
+        uses: nick-invision/retry@v2.2.0
+        with:
+          timeout_seconds: 3
+          retry_wait_seconds: 10
+          max_attempts: 30
+          warning_on_retry: false
+          # Just check that the root endpoint returns a success status (-f flag).
+          command: curl -sSfLi ${{ steps.oc-new-app.outputs.route }}
+
+      - name: Tear down
+        if: always()
+        run:
+          oc delete all --selector=${{ steps.oc-new-app.outputs.selector }} -n ${{ env.TEST_NAMESPACE }}
+
+  using-registry-creds:
+    name: Create secret using registry creds
+    runs-on: ubuntu-20.04
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: OpenShift login
+        uses: redhat-actions/oc-login@v1
+        with:
+          openshift_server_url: ${{ secrets.OPENSHIFT_URL }}
+          openshift_token: ${{ secrets.OPENSHIFT_TOKEN }}
+          insecure_skip_tls_verify: true
+          namespace: ${{ env.TEST_NAMESPACE }}
+
+      # This step will create a deployment, service, and route to run your app and expose it to the internet.
+      - name: Create and expose app
+        id: oc-new-app
+        uses: ./
+        with:
+          app_name: ${{ env.APP_NAME }}-creds-method
+          image: ${{ env.IMAGE_PATH }}
+          namespace: ${{ env.TEST_NAMESPACE }}
+          port: ${{ env.APP_PORT }}
+          registry_hostname: quay.io
+          registry_username: ${{ env.REGISTRY_USERNAME }}
+          registry_password: ${{ secrets.REGISTRY_PASSWORD }}
+
+      - name: Echo outputs
+        run: |
+          echo "${{ toJSON(steps.oc-new-app.outputs) }}"
+
+      # Perform a (very) basic integration test.
+      # This step is retried since the time to pull the image and start the pod can vary.
+      - name: Test project is running
+        id: test-project
+        uses: nick-invision/retry@v2.2.0
+        with:
+          timeout_seconds: 3
+          retry_wait_seconds: 10
+          max_attempts: 30
+          warning_on_retry: false
+          # Just check that the root endpoint returns a success status (-f flag).
+          command: curl -sSfLi ${{ steps.oc-new-app.outputs.route }}
+
+      - name: Tear down
+        if: always()
+        run:
+          oc delete all --selector=${{ steps.oc-new-app.outputs.selector }} -n ${{ env.TEST_NAMESPACE }}
+
+  using-existing-pull-secret:
+    name: Use existing pull secret
+    runs-on: ubuntu-20.04
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: OpenShift login
+        uses: redhat-actions/oc-login@v1
+        with:
+          openshift_server_url: ${{ secrets.OPENSHIFT_URL }}
+          openshift_token: ${{ secrets.OPENSHIFT_TOKEN }}
+          insecure_skip_tls_verify: true
+          namespace: ${{ env.TEST_NAMESPACE }}
+
+      # This step will create a deployment, service, and route to run your app and expose it to the internet.
+      - name: Create and expose app
+        id: oc-new-app
+        uses: ./
+        with:
+          app_name: ${{ env.APP_NAME }}-secret-method
+          image: ${{ env.IMAGE_PATH }}
+          namespace: ${{ env.TEST_NAMESPACE }}
+          port: ${{ env.APP_PORT }}
+          image_pull_secret_name: ${{ env.PULL_SECRET_NAME }}
+
+      - name: Echo outputs
+        run: |
+          echo "${{ toJSON(steps.oc-new-app.outputs) }}"
+
+      # Perform a (very) basic integration test.
+      # This step is retried since the time to pull the image and start the pod can vary.
+      - name: Test project is running
+        id: test-project
+        uses: nick-invision/retry@v2.2.0
+        with:
+          timeout_seconds: 3
+          retry_wait_seconds: 10
+          max_attempts: 30
+          warning_on_retry: false
+          # Just check that the root endpoint returns a success status (-f flag).
+          command: curl -sSfLi ${{ steps.oc-new-app.outputs.route }}
+
+      - name: Tear down
+        if: always()
+        run:
+          oc delete all --selector=${{ steps.oc-new-app.outputs.selector }} -n ${{ env.TEST_NAMESPACE }}

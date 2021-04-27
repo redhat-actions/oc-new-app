@@ -6,8 +6,8 @@ on:
     - cron: '0 0 * * *'  # every day at midnight
 
 env:
-  IMAGE_PATH: quay.io/diagrawa/petclinic-private:latest
-  TEST_NAMESPACE: diagrawa-dev
+  IMAGE_PATH: quay.io/redhat-github-actions/petclinic:latest
+  TEST_NAMESPACE: github-actions-bot-dev
   APP_NAME: petclinic
   APP_PORT: 8080
 
@@ -41,13 +41,6 @@ jobs:
           insecure_skip_tls_verify: true
           namespace: ${{ env.TEST_NAMESPACE }}
 
-      - name: Podman login
-        uses: redhat-actions/podman-login@v1
-        with:
-          registry: quay.io
-          username: diagrawa
-          password: ${{ secrets.REGISTRY_PASSWORD }}
-
       # This step will create a deployment, service, and route to run your app and expose it to the internet.
       - name: Create and expose app
         id: oc-new-app
@@ -57,9 +50,9 @@ jobs:
           image: ${{ env.IMAGE_PATH }}
           namespace: ${{ env.TEST_NAMESPACE }}
           port: ${{ env.APP_PORT }}
-          create_pull_secret_from: podman
+          # create_pull_secret_from: podman
           # registry: quay.io
-          # registry_username: diagrawa
+          # registry_username: ${{ env.REGISTRY_USERNAME }}
           # registry_password: ${{ secrets.REGISTRY_PASSWORD }}
 
       - name: Echo outputs

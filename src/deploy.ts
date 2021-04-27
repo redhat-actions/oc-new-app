@@ -153,7 +153,7 @@ namespace Deploy {
     ): Promise<void> {
         // check if pull secret exists or not
         if (await isPullSecretExists(pullSecretName, namespaceArg)) {
-            ghCore.info(`ℹ️ Secret $"{pullSecretName}" already present, using this secret`);
+            ghCore.info(`ℹ️ Secret "${pullSecretName}" already present, using this secret`);
             return;
         }
 
