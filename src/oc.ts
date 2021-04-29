@@ -7,6 +7,7 @@ import * as os from "os";
 import * as ghExec from "@actions/exec";
 import * as ghCore from "@actions/core";
 import * as util from "./utils";
+import { ExecResult } from "./types";
 
 const EXECUTABLE = util.getOS() === "windows" ? "oc.exe" : "oc";
 
@@ -95,7 +96,7 @@ namespace Oc {
     export async function exec(
         args: string[],
         execOptions: ghExec.ExecOptions & { group?: boolean } = {}
-    ):Promise<{ exitCode: number, out: string, err: string }> {
+    ):Promise<ExecResult> {
         // ghCore.info(`${EXECUTABLE} ${args.join(" ")}`)
 
         let stdout = "";
@@ -132,7 +133,7 @@ namespace Oc {
             }
 
             return {
-                exitCode, out: stdout, err: stderr,
+                exitCode, stdout, stderr,
             };
         }
 

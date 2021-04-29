@@ -118,7 +118,7 @@ namespace Deploy {
         }
 
         const execResult = await Oc.exec(ocExecArgs);
-        return execResult.out.trim();
+        return execResult.stdout.trim();
     }
 
     export async function createPullSecretFromFile(
@@ -211,8 +211,12 @@ namespace Deploy {
             ocExecArgs.push(namespaceArg);
         }
         try {
-            await Oc.exec(ocExecArgs, { group: true });
-            return true;
+            const commandResult = await Oc.exec(
+                ocExecArgs, { ignoreReturnCode: true, failOnStdErr: false, group: true }
+            );
+            if (commandResult.exitCode === 0) {
+                return true;
+            }
         }
         catch (error) {
             ghCore.info(error);
@@ -236,7 +240,7 @@ namespace Deploy {
             ocExecArgs.push(namespaceArg);
         }
         const execResult = await Oc.exec(ocExecArgs);
-        const secretsList = execResult.out.trim().split(" ");
+        const secretsList = execResult.stdout.trim().split(" ");
         secretExists = secretsList.some((secretName) => secretName === pullSecretName);
 
         return secretExists;
