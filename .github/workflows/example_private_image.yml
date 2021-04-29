@@ -63,7 +63,7 @@ jobs:
       - name: Tear down
         if: always()
         run:
-          oc delete all --selector=${{ steps.oc-new-app.outputs.selector }} -n ${{ env.TEST_NAMESPACE }}
+          oc delete all,secret --selector=${{ steps.oc-new-app.outputs.selector }} -n ${{ env.TEST_NAMESPACE }}
 
   using-podman-auth-file:
     needs: using-docker-auth-file
@@ -118,7 +118,7 @@ jobs:
       - name: Tear down
         if: always()
         run:
-          oc delete all --selector=${{ steps.oc-new-app.outputs.selector }} -n ${{ env.TEST_NAMESPACE }}
+          oc delete all,secret --selector=${{ steps.oc-new-app.outputs.selector }} -n ${{ env.TEST_NAMESPACE }}
 
   using-registry-creds:
     name: Create secret using registry creds
@@ -167,7 +167,7 @@ jobs:
       - name: Tear down
         if: always()
         run:
-          oc delete all --selector=${{ steps.oc-new-app.outputs.selector }} -n ${{ env.TEST_NAMESPACE }}
+          oc delete all,secret --selector=${{ steps.oc-new-app.outputs.selector }} -n ${{ env.TEST_NAMESPACE }}
 
   using-existing-pull-secret:
     name: Use existing pull secret
@@ -214,4 +214,4 @@ jobs:
       - name: Tear down
         if: always()
         run:
-          oc delete all --selector=${{ steps.oc-new-app.outputs.selector }} -n ${{ env.TEST_NAMESPACE }}
+          oc delete all,secret --selector=${{ steps.oc-new-app.outputs.selector }} -n ${{ env.TEST_NAMESPACE }}

@@ -122,7 +122,7 @@ namespace Deploy {
     }
 
     export async function createPullSecretFromFile(
-        pullSecretName: string, authFilePath: string, namespaceArg?: string
+        pullSecretName: string, authFilePath: string, appSelector: string, namespaceArg?: string
     ): Promise<void> {
         // check if pull secret exists or not
         if (await isPullSecretExists(pullSecretName, namespaceArg)) {
@@ -144,12 +144,12 @@ namespace Deploy {
         await Oc.exec(ocExecArgs);
 
         // Add label to uniquely identify this secret
-        await addLabelToSecret(pullSecretName, namespaceArg);
+        await addLabelToSecret(pullSecretName, appSelector, namespaceArg);
     }
 
     export async function createPullSecretFromCreds(
         pullSecretName: string, registryServer: string, registryUsername: string,
-        registryPassword: string, namespaceArg?: string
+        registryPassword: string, appSelector: string, namespaceArg?: string
     ): Promise<void> {
         // check if pull secret exists or not
         if (await isPullSecretExists(pullSecretName, namespaceArg)) {
@@ -171,7 +171,7 @@ namespace Deploy {
 
         await Oc.exec(ocExecArgs);
 
-        await addLabelToSecret(pullSecretName, namespaceArg);
+        await addLabelToSecret(pullSecretName, appSelector, namespaceArg);
     }
 
     export async function linkSecretToServiceAccount(pullSecretName: string, namespaceArg?: string): Promise<void> {
@@ -189,10 +189,11 @@ namespace Deploy {
         await Oc.exec(ocExecArgs);
     }
 
-    async function addLabelToSecret(pullSecretName: string, namespaceArg?: string): Promise<void> {
+    async function addLabelToSecret(pullSecretName: string, appSelector: string, namespaceArg?: string): Promise<void> {
         ghCore.info(`Adding label "${secretLabel}" to secret "${pullSecretName}"`);
+
         const ocExecArgs = [
-            Oc.Commands.Label, Oc.SubCommands.Secret, pullSecretName, secretLabel,
+            Oc.Commands.Label, Oc.SubCommands.Secret, pullSecretName, secretLabel, appSelector,
         ];
 
         if (namespaceArg) {

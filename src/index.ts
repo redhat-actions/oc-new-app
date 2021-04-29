@@ -46,14 +46,14 @@ async function run(): Promise<PullSecretData | undefined> {
         createPullSecretFrom = createPullSecretFrom.toLowerCase();
         if (createPullSecretFrom === "docker" || createPullSecretFrom === "podman") {
             isPullSecretCreated = await createPullSecretFromAuthFile(
-                pullSecretName, createPullSecretFrom, namespaceArg
+                pullSecretName, createPullSecretFrom, appSelector, namespaceArg
             );
         }
     }
     else if (registry) {
         pullSecretName = "registry-creds-secret";
         isPullSecretCreated = await createPullSecretFromRegistryCreds(
-            pullSecretName, registry, registryUsername, registryPassword, namespaceArg
+            pullSecretName, registry, registryUsername, registryPassword, appSelector, namespaceArg
         );
     }
 
@@ -86,23 +86,25 @@ async function run(): Promise<PullSecretData | undefined> {
 }
 
 async function createPullSecretFromAuthFile(
-    pullSecretName: string, createPullSecretFrom: "docker" | "podman", namespaceArg: string
+    pullSecretName: string, createPullSecretFrom: "docker" | "podman", appSelector: string, namespaceArg: string
 ): Promise<boolean> {
     let pullSecretCreated: boolean;
     if (createPullSecretFrom === "docker") {
-        pullSecretCreated = await createPullSecretFromDocker(pullSecretName, namespaceArg);
+        pullSecretCreated = await createPullSecretFromDocker(pullSecretName, appSelector, namespaceArg);
     }
     else {
-        pullSecretCreated = await createPullSecretFromPodman(pullSecretName, namespaceArg);
+        pullSecretCreated = await createPullSecretFromPodman(pullSecretName, appSelector, namespaceArg);
     }
 
     return pullSecretCreated;
 }
 
-async function createPullSecretFromDocker(pullSecretName: string, namespaceArg: string): Promise<boolean> {
+async function createPullSecretFromDocker(
+    pullSecretName: string, appSelector: string, namespaceArg: string,
+): Promise<boolean> {
     const dockerAuthFilePath = path.join(os.homedir(), ".docker/config.json");
     if (await utils.fileExists(dockerAuthFilePath)) {
-        await Deploy.createPullSecretFromFile(pullSecretName, dockerAuthFilePath, namespaceArg);
+        await Deploy.createPullSecretFromFile(pullSecretName, dockerAuthFilePath, appSelector, namespaceArg);
         await Deploy.linkSecretToServiceAccount(pullSecretName, namespaceArg);
     }
     else {
@@ -113,10 +115,12 @@ async function createPullSecretFromDocker(pullSecretName: string, namespaceArg: 
     return true;
 }
 
-async function createPullSecretFromPodman(pullSecretName: string, namespaceArg: string): Promise<boolean> {
+async function createPullSecretFromPodman(
+    pullSecretName: string, appSelector: string, namespaceArg: string,
+): Promise<boolean> {
     const podmanAuthFilePath = path.join("/tmp", `podman-run-${process.getuid()}`, "containers/auth.json");
     if (await utils.fileExists(podmanAuthFilePath)) {
-        await Deploy.createPullSecretFromFile(pullSecretName, podmanAuthFilePath, namespaceArg);
+        await Deploy.createPullSecretFromFile(pullSecretName, podmanAuthFilePath, appSelector, namespaceArg);
         await Deploy.linkSecretToServiceAccount(pullSecretName, namespaceArg);
     }
     else {
@@ -128,11 +132,12 @@ async function createPullSecretFromPodman(pullSecretName: string, namespaceArg: 
 }
 
 async function createPullSecretFromRegistryCreds(
-    pullSecretName: string, registry: string, registryUsername: string, registryPassword: string, namespaceArg: string
+    pullSecretName: string, registry: string, registryUsername: string,
+    registryPassword: string, appSelector: string, namespaceArg: string
 ): Promise<boolean> {
     if (isUsernameAndPasswordProvided(registryUsername, registryPassword)) {
         await Deploy.createPullSecretFromCreds(
-            pullSecretName, registry, registryUsername, registryPassword, namespaceArg
+            pullSecretName, registry, registryUsername, registryPassword, appSelector, namespaceArg
         );
 
         return true;
