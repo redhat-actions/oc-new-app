@@ -4,11 +4,14 @@
  *************************************************************************************************/
 
 import * as ghCore from "@actions/core";
+import * as path from "path";
+import * as os from "os";
 import { Inputs, Outputs } from "./generated/inputs-outputs";
 import Deploy from "./deploy";
 import * as utils from "./utils";
+import { PullSecretData } from "./types";
 
-async function run(): Promise<void> {
+async function run(): Promise<PullSecretData | undefined> {
     ghCore.debug(`Runner OS is ${utils.getOS()}`);
     ghCore.debug(`Node version is ${process.version}`);
 
@@ -16,15 +19,42 @@ async function run(): Promise<void> {
     const image = ghCore.getInput(Inputs.IMAGE);
     const namespace = ghCore.getInput(Inputs.NAMESPACE);
     const port = ghCore.getInput(Inputs.PORT);
+    let createPullSecretFrom = ghCore.getInput(Inputs.CREATE_PULL_SECRET_FROM);
+    const registry = ghCore.getInput(Inputs.REGISTRY_HOSTNAME);
+    const registryUsername = ghCore.getInput(Inputs.REGISTRY_USERNAME);
+    const registryPassword = ghCore.getInput(Inputs.REGISTRY_PASSWORD);
+    const imagePullSecretName = ghCore.getInput(Inputs.IMAGE_PULL_SECRET_NAME);
 
     const appSelector = utils.getSelector(appName);
 
-    let namespaceArg: string | undefined;
-    if (namespace) {
-        namespaceArg = `--namespace=${namespace}`;
+    const namespaceArg = utils.getNamespaceArg(namespace);
+
+    let pullSecretName = "auth-file-secret";
+    // boolean value to check if pull secret is created or not
+    let isPullSecretCreated = false;
+
+    if (imagePullSecretName) {
+        if (await Deploy.isPullSecretExists(imagePullSecretName, namespaceArg)) {
+            ghCore.info(`Using the provided secret "${imagePullSecretName}"`);
+            await Deploy.linkSecretToServiceAccount(imagePullSecretName, namespaceArg);
+        }
+        else {
+            throw new Error(`❌ Secret ${imagePullSecretName} not found. Make sure that the provided secret exists`);
+        }
     }
-    else {
-        ghCore.info(`No namespace provided`);
+    else if (createPullSecretFrom) {
+        createPullSecretFrom = createPullSecretFrom.toLowerCase();
+        if (createPullSecretFrom === "docker" || createPullSecretFrom === "podman") {
+            isPullSecretCreated = await createPullSecretFromAuthFile(
+                pullSecretName, createPullSecretFrom, appSelector, namespaceArg
+            );
+        }
+    }
+    else if (registry) {
+        pullSecretName = "registry-creds-secret";
+        isPullSecretCreated = await createPullSecretFromRegistryCreds(
+            pullSecretName, registry, registryUsername, registryPassword, appSelector, namespaceArg
+        );
     }
 
     // Take down any old deployment
@@ -39,17 +69,110 @@ async function run(): Promise<void> {
 
     await Deploy.getDeployment(appSelector, namespaceArg);
 
-    let route = await Deploy.getRoute(appName, namespaceArg);
     // To make it appear as a URL
-    route = `http://${route}`;
+    const route = `http://${await Deploy.getRoute(appName, namespaceArg)}`;
     ghCore.info(`✅ ${appName} is exposed at ${route}`);
 
     ghCore.setOutput(Outputs.ROUTE, route);
     ghCore.setOutput(Outputs.SELECTOR, appSelector);
+
+    if (isPullSecretCreated) {
+        return {
+            pullSecretName, namespace,
+        };
+    }
+
+    return undefined;
+}
+
+async function createPullSecretFromAuthFile(
+    pullSecretName: string, createPullSecretFrom: "docker" | "podman", appSelector: string, namespaceArg: string
+): Promise<boolean> {
+    let pullSecretCreated: boolean;
+    if (createPullSecretFrom === "docker") {
+        pullSecretCreated = await createPullSecretFromDocker(pullSecretName, appSelector, namespaceArg);
+    }
+    else {
+        pullSecretCreated = await createPullSecretFromPodman(pullSecretName, appSelector, namespaceArg);
+    }
+
+    return pullSecretCreated;
+}
+
+async function createPullSecretFromDocker(
+    pullSecretName: string, appSelector: string, namespaceArg: string,
+): Promise<boolean> {
+    const dockerAuthFilePath = path.join(os.homedir(), ".docker/config.json");
+    if (await utils.fileExists(dockerAuthFilePath)) {
+        await Deploy.createPullSecretFromFile(pullSecretName, dockerAuthFilePath, appSelector, namespaceArg);
+        await Deploy.linkSecretToServiceAccount(pullSecretName, namespaceArg);
+    }
+    else {
+        throw new Error(`❌ Docker auth file not found at ${dockerAuthFilePath}. `
+        + `Failed to create the pull secret.`);
+    }
+
+    return true;
+}
+
+async function createPullSecretFromPodman(
+    pullSecretName: string, appSelector: string, namespaceArg: string,
+): Promise<boolean> {
+    const podmanAuthFilePath = path.join("/tmp", `podman-run-${process.getuid()}`, "containers/auth.json");
+    if (await utils.fileExists(podmanAuthFilePath)) {
+        await Deploy.createPullSecretFromFile(pullSecretName, podmanAuthFilePath, appSelector, namespaceArg);
+        await Deploy.linkSecretToServiceAccount(pullSecretName, namespaceArg);
+    }
+    else {
+        throw new Error(`❌ Podman auth file not found at ${podmanAuthFilePath}. `
+        + `Failed to create the pull secret.`);
+    }
+
+    return true;
+}
+
+async function createPullSecretFromRegistryCreds(
+    pullSecretName: string, registry: string, registryUsername: string,
+    registryPassword: string, appSelector: string, namespaceArg: string
+): Promise<boolean> {
+    if (isUsernameAndPasswordProvided(registryUsername, registryPassword)) {
+        await Deploy.createPullSecretFromCreds(
+            pullSecretName, registry, registryUsername, registryPassword, appSelector, namespaceArg
+        );
+        await Deploy.linkSecretToServiceAccount(pullSecretName, namespaceArg);
+
+        return true;
+    }
+    ghCore.warning(`Inputs ${Inputs.REGISTRY_USERNAME} and ${Inputs.REGISTRY_PASSWORD} are missing. `
+    + `Pull secret will not be created.`);
+
+    return false;
+}
+
+function isUsernameAndPasswordProvided(registryUsername: string, registryPassword: string): boolean {
+    if (registryUsername && !registryPassword) {
+        ghCore.warning(`Input ${Inputs.REGISTRY_USERNAME} is provided but ${Inputs.REGISTRY_PASSWORD} is missing. `
+        + `Pull secret will not be created.`);
+    }
+    else if (!registryUsername && registryPassword) {
+        ghCore.warning(`Input ${Inputs.REGISTRY_PASSWORD} is provided but ${Inputs.REGISTRY_USERNAME} is missing. `
+        + `Pull secret will not be created.`);
+    }
+    else if (registryUsername && registryPassword) {
+        return true;
+    }
+
+    return false;
 }
 
 run()
-    .then(() => {
+    .then(async (pullSecretData) => {
         ghCore.info("Success.");
+        if (pullSecretData) {
+            const namespaceArg = utils.getNamespaceArg(pullSecretData.namespace);
+            await Deploy.deletePullSecretWithLabel(pullSecretData.pullSecretName, namespaceArg);
+        }
     })
-    .catch(ghCore.setFailed);
+    .catch((err) => {
+        ghCore.setFailed(err.message);
+    });

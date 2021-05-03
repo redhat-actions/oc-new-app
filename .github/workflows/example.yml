@@ -6,7 +6,7 @@ on:
     - cron: '0 0 * * *'  # every day at midnight
 
 env:
-  IMAGE_PATH: quay.io/diagrawa/petclinic:latest
+  IMAGE_PATH: quay.io/redhat-github-actions/petclinic:latest
   TEST_NAMESPACE: github-actions-bot-dev
   APP_NAME: petclinic
   APP_PORT: 8080
@@ -50,6 +50,10 @@ jobs:
           image: ${{ env.IMAGE_PATH }}
           namespace: ${{ env.TEST_NAMESPACE }}
           port: ${{ env.APP_PORT }}
+          # create_pull_secret_from: podman
+          # registry: quay.io
+          # registry_username: ${{ env.REGISTRY_USERNAME }}
+          # registry_password: ${{ secrets.REGISTRY_PASSWORD }}
 
       - name: Echo outputs
         run: |
@@ -71,4 +75,4 @@ jobs:
       - name: Tear down
         if: always()
         run:
-          oc delete all --selector=${{ steps.oc-new-app.outputs.selector }} -n ${{ env.TEST_NAMESPACE }}
+          oc delete all,secret --selector=${{ steps.oc-new-app.outputs.selector }} -n ${{ env.TEST_NAMESPACE }}

@@ -7,11 +7,25 @@ export enum Inputs {
      */
     APP_NAME = "app_name",
     /**
+     * "Registry credentials file to use to create a pull secret.
+     * Set this to "docker" or "podman" depending on which tool you used to log in"
+     * Required: false
+     * Default: None.
+     */
+    CREATE_PULL_SECRET_FROM = "create_pull_secret_from",
+    /**
      * The name (reference) of the image to create deployment
      * Required: true
      * Default: None.
      */
     IMAGE = "image",
+    /**
+     * "In the case of private images, provide the image pull secret if you have already created that.
+     * Otherwise, provide inputs create_pull_secret_from or registry_hostname, registry_username and registry_password"
+     * Required: false
+     * Default: None.
+     */
+    IMAGE_PULL_SECRET_NAME = "image_pull_secret_name",
     /**
      * The OpenShift project/Kubernetes namespace to deploy to. Defaults to current context's.
      * Required: false
@@ -24,6 +38,24 @@ export enum Inputs {
      * Default: None.
      */
     PORT = "port",
+    /**
+     * The Hostname/domain of the container image registry such as quay.io, docker.io. to create pull secret
+     * Required: false
+     * Default: None.
+     */
+    REGISTRY_HOSTNAME = "registry_hostname",
+    /**
+     * Password, encrypted password, or access token of the provided registry to use for the pull secret
+     * Required: false
+     * Default: None.
+     */
+    REGISTRY_PASSWORD = "registry_password",
+    /**
+     * Registry username to use for the pull secret
+     * Required: false
+     * Default: None.
+     */
+    REGISTRY_USERNAME = "registry_username",
 }
 
 export enum Outputs {
