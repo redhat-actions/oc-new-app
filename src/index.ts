@@ -62,8 +62,12 @@ async function run(): Promise<PullSecretData | undefined> {
 
     await Deploy.newApp(appName, image, namespaceArg);
 
-    // Make sure the app port is exposed
-    await Deploy.patchSvc(appName, port, namespaceArg);
+    if (port) {
+        await Deploy.patchSvc(appName, port, namespaceArg);
+    }
+    else {
+        ghCore.info("No port is provided in the action inputs");
+    }
 
     await Deploy.exposeSvc(appName, port, namespaceArg);
 
