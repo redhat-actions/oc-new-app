@@ -25,7 +25,9 @@ inputs:
     description: "The OpenShift project/Kubernetes namespace to deploy to. Defaults to current context's."
     required: false
   port:
-    description: "The port to use for the application"
+    description: |
+      "A port to expose from the application container through a Service.
+      If exactly one port is exposed in the container metadata, then this input can be omitted."
     required: false
   registry_hostname:
     description: "The Hostname/domain of the container image registry such as quay.io, docker.io. to create pull secret"

@@ -33,7 +33,8 @@ export enum Inputs {
      */
     NAMESPACE = "namespace",
     /**
-     * The port to use for the application
+     * "A port to expose from the application container through a Service.
+     * If exactly one port is exposed in the container metadata, then this input can be omitted."
      * Required: false
      * Default: None.
      */

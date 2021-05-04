@@ -75,10 +75,16 @@ namespace Deploy {
      * @param svcPort Port to expose
      * @param namespace Namespace where created app exists
      */
-    export async function exposeSvc(appName: string, svcPort: string, namespaceArg?: string): Promise<void> {
+    export async function exposeSvc(appName: string, svcPort?: string, namespaceArg?: string): Promise<void> {
         ghCore.info(`Exposing the route for "${appName}" service...`);
-        const ocOptions = Oc.getOptions({ port: svcPort });
-        const ocExecArgs = [ Oc.Commands.Expose, Oc.SubCommands.Service, appName, ...ocOptions ];
+
+        const ocExecArgs = [ Oc.Commands.Expose, Oc.SubCommands.Service, appName ];
+
+        if (svcPort) {
+            const ocOptions = Oc.getOptions({ port: svcPort });
+            ocExecArgs.push(...ocOptions);
+        }
+
         if (namespaceArg) {
             ocExecArgs.push(namespaceArg);
         }
