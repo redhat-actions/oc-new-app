@@ -29,15 +29,15 @@ It creates a Deployment which runs the application Pod, and then exposes that po
 
 | Input | Description | Default |
 | ----- | ----------- | ------- |
-| app_name | Name to use for the generated application artifacts | **Must be provided** |
-| create_pull_secret_from | Registry credentials file to use to create a pull secret. Set this to `docker` or `podman` depending on which tool you used to log in. See [using-private-images](#using-private-images) | None
-| image | The fully qualified name of the application image | **Must be provided** |
-| image_pull_secret_name | In the case of private images, provide the image pull secret name if you have already created that. Otherwise, see [using-private-images](#using-private-images) | None
-| namespace | OpenShift project/Kubernetes namespace to target | Current context |
-| port | A port to expose from the application container through a Service. If exactly one port is exposed in the container metadata, then this input can be omitted | None |
-| registry_hostname | The Hostname/domain of the container image registry such as quay.io, or docker.io that a private container image will be pulled from. The pull secret is used to access this registry. See [using-private-images](#using-private-images) | None
-| registry_username | Registry username to use for the pull secret | None
-| registry_password | Password, encrypted password, or access token of the provided registry to use for the pull secret | None
+| app_name | Name to use for the generated application artifacts. | **Must be provided** |
+| create_pull_secret_from | Registry credentials file to use to create a pull secret. Set this to `docker` or `podman` depending on which tool you used to log in. See [using-private-images](#using-private-images). | None
+| image | The fully qualified name of the application image. | **Must be provided** |
+| image_pull_secret_name | In the case of private images, provide the image pull secret name if you have already created that. Otherwise, see [using-private-images](#using-private-images). | None
+| namespace | OpenShift project/Kubernetes namespace to target. | Current context |
+| port | A port to expose from the application container through a Service. If exactly one port is exposed in the container metadata, then this input can be omitted. | None |
+| registry_hostname | The Hostname/domain of the container image registry such as quay.io, or docker.io that a private container image will be pulled from. The pull secret is used to access this registry. See [using-private-images](#using-private-images). | None
+| registry_username | Registry username to use for the pull secret. | None
+| registry_password | Password, encrypted password, or access token of the provided registry to use for the pull secret. | None
 
 <a id="action-outputs"></a>
 
@@ -45,8 +45,8 @@ It creates a Deployment which runs the application Pod, and then exposes that po
 
 | Output | Description |
 | ------ | ----------- |
-| route | URL to the application route |
-| selector | Label selector of the created resources |
+| route | URL to the application route. |
+| selector | Label selector of the created resources. |
 
 <a id="example"></a>
 
