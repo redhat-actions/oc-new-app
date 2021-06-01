@@ -35,6 +35,8 @@ jobs:
       # This step will create a deployment, service, and route to run your app and expose it to the internet.
       - name: Create and expose app
         id: oc-new-app
+        # uses: redhat-actions/oc-new-app@v1
+        # Test the checked-out version of this action - a user would need the above 'uses'.
         uses: ./
         with:
           app_name: ${{ env.APP_NAME }}-docker-method
@@ -90,6 +92,8 @@ jobs:
       # This step will create a deployment, service, and route to run your app and expose it to the internet.
       - name: Create and expose app
         id: oc-new-app
+        # uses: redhat-actions/oc-new-app@v1
+        # Test the checked-out version of this action - a user would need the above 'uses'.
         uses: ./
         with:
           app_name: ${{ env.APP_NAME }}-podman-method
@@ -137,6 +141,8 @@ jobs:
       # This step will create a deployment, service, and route to run your app and expose it to the internet.
       - name: Create and expose app
         id: oc-new-app
+        # uses: redhat-actions/oc-new-app@v1
+        # Test the checked-out version of this action - a user would need the above 'uses'.
         uses: ./
         with:
           app_name: ${{ env.APP_NAME }}-creds-method
@@ -186,6 +192,8 @@ jobs:
       # This step will create a deployment, service, and route to run your app and expose it to the internet.
       - name: Create and expose app
         id: oc-new-app
+        # uses: redhat-actions/oc-new-app@v1
+        # Test the checked-out version of this action - a user would need the above 'uses'.
         uses: ./
         with:
           app_name: ${{ env.APP_NAME }}-secret-method

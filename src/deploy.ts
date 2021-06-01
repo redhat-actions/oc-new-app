@@ -16,10 +16,17 @@ namespace Deploy {
      * @param image Image to create application from
      * @param namespace Namespace in which to create new app
      */
-    export async function newApp(appName: string, image: string, namespaceArg?: string): Promise<void> {
+    export async function newApp(
+        appName: string, image: string, buildEnvs: string[], namespaceArg?: string
+    ): Promise<void> {
         ghCore.info("⏳ Creating Deployment from image of the application...");
-        const ocOptions = Oc.getOptions({ name: appName, "docker-image": image });
-        const ocExecArgs = [ Oc.Commands.NewApp, ...ocOptions ];
+        const ocOptions = Oc.getOptions({ name: appName });
+
+        buildEnvs.forEach((buildEnv) => {
+            ocOptions.push(...Oc.getOptions({ "build-env": buildEnv }));
+        });
+
+        const ocExecArgs = [ Oc.Commands.NewApp, ...ocOptions, image ];
         if (namespaceArg) {
             ocExecArgs.push(namespaceArg);
         }

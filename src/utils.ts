@@ -55,3 +55,17 @@ export function getNamespaceArg(namespace: string): string {
 
     return namespaceArg;
 }
+
+export function getInputList(name: string): string[] {
+    const items = ghCore.getInput(name);
+    if (!items) {
+        return [];
+    }
+    return items
+        .split(/\r?\n/)
+        .filter((x) => x)
+        .reduce<string[]>(
+            (acc, line) => acc.concat(line).map((pat) => pat.trim()),
+            [],
+        );
+}

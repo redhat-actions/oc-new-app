@@ -17,8 +17,75 @@ jobs:
   #####################################################################################################################
   ## The OpenShift Deploy step deploys the image that we have previously created and present on quay.io
   ## It can then run any integration tests before deleting the resources that were created.
-  openshift-deploy:
-    name: Deploy on OpenShift
+  openshift-deploy-container-image:
+    name: Deploy using container image
+    runs-on: ubuntu-20.04
+    steps:
+      - name: Checkout action
+        uses: actions/checkout@v2
+
+       # Use the commit short-sha as the suffix of the app_name
+      - name: Get commit short-sha
+        id: commit-data
+        uses: redhat-actions/common/commit-data@v1
+
+      # Log into the OpenShift cluster using the secrets configured in the repository settings.
+      # The GitHub Ubuntu runners have oc pre-installed.
+      # If you're not using those runners, be sure to check out https://github.com/redhat-actions/oc-installer.
+      - name: OpenShift login
+        uses: redhat-actions/oc-login@v1
+        with:
+          openshift_server_url: ${{ secrets.OPENSHIFT_URL }}
+          openshift_token: ${{ secrets.OPENSHIFT_TOKEN }}
+          # openshift_username:
+          # openshift_password:
+          insecure_skip_tls_verify: true
+          namespace: ${{ env.TEST_NAMESPACE }}
+
+      # This step will create a deployment, service, and route to run your app and expose it to the internet.
+      - name: Create and expose app
+        id: oc-new-app
+        # uses: redhat-actions/oc-new-app@v1
+        # Test the checked-out version of this action - a user would need the above 'uses'.
+        uses: ./
+        with:
+          app_name: ${{ env.APP_NAME }}-${{ steps.commit-data.outputs.short_sha }}-ci
+          image: ${{ env.IMAGE_PATH }}
+          namespace: ${{ env.TEST_NAMESPACE }}
+          # build_env: |
+          #   GEM_HOME=~/.gem
+          #   HTTP_PROXY=http://myproxy.net:1337/
+          # port: ${{ env.APP_PORT }}
+          # create_pull_secret_from: podman
+          # registry: quay.io
+          # registry_username: ${{ env.REGISTRY_USERNAME }}
+          # registry_password: ${{ secrets.REGISTRY_PASSWORD }}
+
+      - name: Echo outputs
+        run: |
+          echo "${{ toJSON(steps.oc-new-app.outputs) }}"
+
+      # Perform a (very) basic integration test.
+      # This step is retried since the time to pull the image and start the pod can vary.
+      - name: Test project is running
+        id: test-project
+        uses: nick-invision/retry@v2.2.0
+        with:
+          timeout_seconds: 3
+          retry_wait_seconds: 10
+          max_attempts: 30
+          warning_on_retry: false
+          # Just check that the root endpoint returns a success status (-f flag).
+          command: curl -sSfLi ${{ steps.oc-new-app.outputs.route }}
+
+      - name: Tear down
+        if: always()
+        run:
+          oc delete all,secret --selector=${{ steps.oc-new-app.outputs.selector }} -n ${{ env.TEST_NAMESPACE }}
+
+  # Use created image stream to deploy the application
+  openshift-deploy-image-stream:
+    name: Deploy using image stream
     runs-on: ubuntu-20.04
     steps:
       - uses: actions/checkout@v2
@@ -44,16 +111,13 @@ jobs:
       # This step will create a deployment, service, and route to run your app and expose it to the internet.
       - name: Create and expose app
         id: oc-new-app
+        # uses: redhat-actions/oc-new-app@v1
+        # Test the checked-out version of this action - a user would need the above 'uses'.
         uses: ./
         with:
-          app_name: ${{ env.APP_NAME }}-${{ steps.commit-data.outputs.short_sha }}
-          image: ${{ env.IMAGE_PATH }}
+          app_name: ${{ env.APP_NAME }}-${{ steps.commit-data.outputs.short_sha }}-is
+          image: ${{ env.TEST_NAMESPACE }}/${{ env.APP_NAME }}
           namespace: ${{ env.TEST_NAMESPACE }}
-          # port: ${{ env.APP_PORT }}
-          # create_pull_secret_from: podman
-          # registry: quay.io
-          # registry_username: ${{ env.REGISTRY_USERNAME }}
-          # registry_password: ${{ secrets.REGISTRY_PASSWORD }}
 
       - name: Echo outputs
         run: |

@@ -7,6 +7,13 @@ export enum Inputs {
      */
     APP_NAME = "app_name",
     /**
+     * "Environment variable key-value pairs to pass to the build container at the run time.
+     * Use the form env_name=env_value, and separate arguments with newlines."
+     * Required: false
+     * Default: None.
+     */
+    BUILD_ENV = "build_env",
+    /**
      * "Registry credentials file to use to create a pull secret.
      * Set this to "docker" or "podman" depending on which tool you used to log in"
      * Required: false
@@ -14,7 +21,8 @@ export enum Inputs {
      */
     CREATE_PULL_SECRET_FROM = "create_pull_secret_from",
     /**
-     * The name (reference) of the image to create deployment
+     * "The name (reference) of the image to create deployment.
+     * It can be a container image or an image stream"
      * Required: true
      * Default: None.
      */
