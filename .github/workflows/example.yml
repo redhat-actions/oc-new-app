@@ -64,6 +64,8 @@ jobs:
         # uses: redhat-actions/oc-new-app@v1
         # Test the checked-out version of this action - a user would need the above 'uses'.
         uses: ./
+        env:
+          IMAGE: ${{ env[matrix.image-source] }}
         with:
           app_name: ${{ env.APP_NAME }}-${{ steps.commit-data.outputs.short_sha }}
           image: ${{ env.IMAGE }}
@@ -76,8 +78,6 @@ jobs:
           # registry: quay.io
           # registry_username: ${{ env.REGISTRY_USERNAME }}
           # registry_password: ${{ secrets.REGISTRY_PASSWORD }}
-        env:
-          IMAGE: ${{ env[matrix.image-source] }}
 
       - name: Echo outputs
         run: |
