@@ -7,13 +7,10 @@ on:
 
 env:
   IMAGE_PATH: quay.io/redhat-github-actions/petclinic:latest
-
-  ## Need to change before merge
-  # TEST_NAMESPACE: github-actions-bot-dev
-  TEST_NAMESPACE: diagrawa-dev
+  TEST_NAMESPACE: github-actions-bot-dev
   APP_NAME: petclinic
   APP_PORT: 8080
-  IMAGE_STREAM: diagrawa-dev/petclinic
+  IMAGE_STREAM: github-actions-bot-dev/petclinic
 
 jobs:
   ## To keep the workflow simple, we will only be using oc-new-app action in the workflow and use the
@@ -41,7 +38,7 @@ jobs:
 
       # Log into the OpenShift cluster using the secrets configured in the repository settings.
       # The GitHub Ubuntu runners have oc pre-installed.
-      # If you're not using those runners, be sure to check out https://github.com/redhat-actions/oc-installer.
+      # If you're not using those runners, be sure to check out https://github.com/redhat-actions/openshift-tools-installer.
       - name: OpenShift login
         uses: redhat-actions/oc-login@v1
         with:
@@ -56,7 +53,7 @@ jobs:
         if: ${{ matrix.image-source == 'IMAGE_STREAM' }}
         run: |
           oc create is ${{ env.APP_NAME }}
-          oc import-image ${{ env.APP_NAME }} --from quay.io/redhat-github-actions/petclinic:latest
+          oc import-image ${{ env.APP_NAME }} --from ${{ env.IMAGE_PATH }}
 
       # This step will create a deployment, service, and route to run your app and expose it to the internet.
       - name: Create and expose app
