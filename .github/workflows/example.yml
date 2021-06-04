@@ -10,7 +10,7 @@ env:
   TEST_NAMESPACE: github-actions-bot-dev
   APP_NAME: petclinic
   APP_PORT: 8080
-  IMAGE_STREAM: github-actions-bot-dev/petclinic
+  IMAGE_STREAM: github-actions-bot-dev/petclinic-${{ github.run_id }}
 
 jobs:
   ## To keep the workflow simple, we will only be using oc-new-app action in the workflow and use the
@@ -52,8 +52,8 @@ jobs:
       - name: Create Image stream from the image
         if: ${{ matrix.image-source == 'IMAGE_STREAM' }}
         run: |
-          oc create is ${{ env.APP_NAME }}
-          oc import-image ${{ env.APP_NAME }} --from ${{ env.IMAGE_PATH }}
+          oc create is ${{ env.APP_NAME }}-${{ github.run_id }}
+          oc import-image ${{ env.APP_NAME }}-${{ github.run_id }} --from ${{ env.IMAGE_PATH }}
 
       # This step will create a deployment, service, and route to run your app and expose it to the internet.
       - name: Create and expose app
@@ -95,7 +95,7 @@ jobs:
       - name: Delete Image Stream
         if: ${{ matrix.image-source == 'IMAGE_STREAM' && always() }}
         run: |
-          oc delete is ${{ env.APP_NAME }}
+          oc delete is ${{ env.APP_NAME }}-${{ github.run_id }}
 
       - name: Tear down
         if: always()
