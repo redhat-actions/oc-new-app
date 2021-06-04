@@ -1,5 +1,9 @@
 # oc-new-app Changelog
 
+## v1.2
+- Add support to use Image streams to deploy application.
+- Add input `build_env` to pass environment variables to the build container at the run time.
+
 ## v1.1
 - Add support to use private images for deployment
 - Make input `port` optional
