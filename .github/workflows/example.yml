@@ -70,9 +70,8 @@ jobs:
           app_name: ${{ env.APP_NAME }}-${{ steps.commit-data.outputs.short_sha }}
           image: ${{ env.IMAGE }}
           namespace: ${{ env.TEST_NAMESPACE }}
-          # build_env: |
-          #   GEM_HOME=~/.gem
-          #   HTTP_PROXY=http://myproxy.net:1337/
+          build_env: |
+            MY_ENV=MY_VALUE
           # port: ${{ env.APP_PORT }}
           # create_pull_secret_from: podman
           # registry: quay.io
