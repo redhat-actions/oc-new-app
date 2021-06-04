@@ -17,7 +17,6 @@ jobs:
   using-auth-file:
     name: Create secret using auth file
     strategy:
-      max-parallel: 1
       fail-fast: false
       matrix:
         auth-type: [ "docker", "podman" ]
@@ -54,7 +53,7 @@ jobs:
         # Test the checked-out version of this action - a user would need the above 'uses'.
         uses: ./
         with:
-          app_name: ${{ env.APP_NAME }}-docker-method
+          app_name: ${{ env.APP_NAME }}-${{ matrix.auth-type }}
           image: ${{ env.IMAGE_PATH }}
           namespace: ${{ env.TEST_NAMESPACE }}
           port: ${{ env.APP_PORT }}
@@ -103,7 +102,7 @@ jobs:
         # Test the checked-out version of this action - a user would need the above 'uses'.
         uses: ./
         with:
-          app_name: ${{ env.APP_NAME }}-creds-method
+          app_name: ${{ env.APP_NAME }}-creds
           image: ${{ env.IMAGE_PATH }}
           namespace: ${{ env.TEST_NAMESPACE }}
           port: ${{ env.APP_PORT }}
@@ -154,7 +153,7 @@ jobs:
         # Test the checked-out version of this action - a user would need the above 'uses'.
         uses: ./
         with:
-          app_name: ${{ env.APP_NAME }}-secret-method
+          app_name: ${{ env.APP_NAME }}-secret
           image: ${{ env.IMAGE_PATH }}
           namespace: ${{ env.TEST_NAMESPACE }}
           port: ${{ env.APP_PORT }}
