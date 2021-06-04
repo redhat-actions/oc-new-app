@@ -8,13 +8,20 @@ inputs:
   app_name:
     description: "Name to use for generated application artifacts"
     required: true
+  build_env:
+    description: |
+      "Environment variable key-value pairs to pass to the build container at the run time.
+      Use the form env_name=env_value, and separate arguments with newlines."
+    required: false
   create_pull_secret_from:
     description: |
       "Registry credentials file to use to create a pull secret.
       Set this to "docker" or "podman" depending on which tool you used to log in"
     required: false
   image:
-    description: "The name (reference) of the image to create deployment"
+    description: |
+      "The name (reference) of the image to create deployment.
+      It can be a container image or an image stream"
     required: true
   image_pull_secret_name:
     description: |

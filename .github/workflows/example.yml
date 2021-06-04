@@ -10,6 +10,7 @@ env:
   TEST_NAMESPACE: github-actions-bot-dev
   APP_NAME: petclinic
   APP_PORT: 8080
+  IMAGE_STREAM: github-actions-bot-dev/petclinic
 
 jobs:
   ## To keep the workflow simple, we will only be using oc-new-app action in the workflow and use the
@@ -18,10 +19,17 @@ jobs:
   ## The OpenShift Deploy step deploys the image that we have previously created and present on quay.io
   ## It can then run any integration tests before deleting the resources that were created.
   openshift-deploy:
-    name: Deploy on OpenShift
+    name: Deploy to OpenShift
+    strategy:
+      max-parallel: 1
+      fail-fast: false
+      matrix:
+        image-source: [ "IMAGE_PATH", "IMAGE_STREAM" ]
+
     runs-on: ubuntu-20.04
     steps:
-      - uses: actions/checkout@v2
+      - name: Checkout action
+        uses: actions/checkout@v2
 
        # Use the commit short-sha as the suffix of the app_name
       - name: Get commit short-sha
@@ -30,7 +38,7 @@ jobs:
 
       # Log into the OpenShift cluster using the secrets configured in the repository settings.
       # The GitHub Ubuntu runners have oc pre-installed.
-      # If you're not using those runners, be sure to check out https://github.com/redhat-actions/oc-installer.
+      # If you're not using those runners, be sure to check out https://github.com/redhat-actions/openshift-tools-installer.
       - name: OpenShift login
         uses: redhat-actions/oc-login@v1
         with:
@@ -41,14 +49,26 @@ jobs:
           insecure_skip_tls_verify: true
           namespace: ${{ env.TEST_NAMESPACE }}
 
+      - name: Create Image stream from the image
+        if: ${{ matrix.image-source == 'IMAGE_STREAM' }}
+        run: |
+          oc create is ${{ env.APP_NAME }}
+          oc import-image ${{ env.APP_NAME }} --from ${{ env.IMAGE_PATH }}
+
       # This step will create a deployment, service, and route to run your app and expose it to the internet.
       - name: Create and expose app
         id: oc-new-app
+        # uses: redhat-actions/oc-new-app@v1
+        # Test the checked-out version of this action - a user would need the above 'uses'.
         uses: ./
+        env:
+          IMAGE: ${{ env[matrix.image-source] }}
         with:
           app_name: ${{ env.APP_NAME }}-${{ steps.commit-data.outputs.short_sha }}
-          image: ${{ env.IMAGE_PATH }}
+          image: ${{ env.IMAGE }}
           namespace: ${{ env.TEST_NAMESPACE }}
+          build_env: |
+            MY_ENV=MY_VALUE
           # port: ${{ env.APP_PORT }}
           # create_pull_secret_from: podman
           # registry: quay.io
@@ -72,7 +92,12 @@ jobs:
           # Just check that the root endpoint returns a success status (-f flag).
           command: curl -sSfLi ${{ steps.oc-new-app.outputs.route }}
 
+      - name: Delete Image Stream
+        if: ${{ matrix.image-source == 'IMAGE_STREAM' && always() }}
+        run: |
+          oc delete is ${{ env.APP_NAME }}
+
       - name: Tear down
         if: always()
-        run:
+        run: |
           oc delete all,secret --selector=${{ steps.oc-new-app.outputs.selector }} -n ${{ env.TEST_NAMESPACE }}

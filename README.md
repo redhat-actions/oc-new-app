@@ -30,8 +30,9 @@ It creates a Deployment which runs the application Pod, and then exposes that po
 | Input | Description | Default |
 | ----- | ----------- | ------- |
 | app_name | Name to use for the generated application artifacts. | **Must be provided** |
+| build_env | Environment variable key-value pairs to pass to the build container at the run time. Use the form `env_name=env_value`, and separate arguments with newlines. | None
 | create_pull_secret_from | Registry credentials file to use to create a pull secret. Set this to `docker` or `podman` depending on which tool you used to log in. See [using-private-images](#using-private-images). | None
-| image | The fully qualified name of the application image. | **Must be provided** |
+| image | The fully qualified name of the application image. It can be a container image or an image stream. For more information, refer to [the OpenShift documentation](https://docs.openshift.com/container-platform/4.7/applications/application_life_cycle_management/creating-applications-using-cli.html#applications-create-using-cli-image_creating-applications-using-cli). | **Must be provided** |
 | image_pull_secret_name | In the case of private images, provide the image pull secret name if you have already created that. Otherwise, see [using-private-images](#using-private-images). | None
 | namespace | OpenShift project/Kubernetes namespace to target. | Current context |
 | port | A port to expose from the application container through a Service. If exactly one port is exposed in the container metadata, then this input can be omitted. For more details [see](https://docs.openshift.com/container-platform/4.7/applications/application_life_cycle_management/creating-applications-using-cli.html#applications-create-using-cli-modify_creating-applications-using-cli). | None |

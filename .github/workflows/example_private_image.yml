@@ -14,8 +14,14 @@ env:
   REGISTRY_USERNAME: redhat-github-actions+redhat_actions_ci_puller
 
 jobs:
-  using-docker-auth-file:
-    name: Create secret using Docker auth file
+  using-auth-file:
+    name: Create secret using auth file
+    strategy:
+      max-parallel: 1
+      fail-fast: false
+      matrix:
+        auth-type: [ "docker", "podman" ]
+
     runs-on: ubuntu-20.04
     steps:
       - uses: actions/checkout@v2
@@ -29,58 +35,12 @@ jobs:
           namespace: ${{ env.TEST_NAMESPACE }}
 
       - name: Docker login
+        if: ${{ matrix.auth-type == 'docker' }}
         run: |
           echo "${{ secrets.REGISTRY_PASSWORD }}" | docker login quay.io -u "${{ env.REGISTRY_USERNAME }}" --password-stdin
 
-      # This step will create a deployment, service, and route to run your app and expose it to the internet.
-      - name: Create and expose app
-        id: oc-new-app
-        uses: ./
-        with:
-          app_name: ${{ env.APP_NAME }}-docker-method
-          image: ${{ env.IMAGE_PATH }}
-          namespace: ${{ env.TEST_NAMESPACE }}
-          port: ${{ env.APP_PORT }}
-          create_pull_secret_from: docker
-
-      - name: Echo outputs
-        run: |
-          echo "${{ toJSON(steps.oc-new-app.outputs) }}"
-
-      # Perform a (very) basic integration test.
-      # This step is retried since the time to pull the image and start the pod can vary.
-      - name: Test project is running
-        id: test-project
-        uses: nick-invision/retry@v2.2.0
-        with:
-          timeout_seconds: 3
-          retry_wait_seconds: 10
-          max_attempts: 30
-          warning_on_retry: false
-          # Just check that the root endpoint returns a success status (-f flag).
-          command: curl -sSfLi ${{ steps.oc-new-app.outputs.route }}
-
-      - name: Tear down
-        if: always()
-        run:
-          oc delete all,secret --selector=${{ steps.oc-new-app.outputs.selector }} -n ${{ env.TEST_NAMESPACE }}
-
-  using-podman-auth-file:
-    needs: using-docker-auth-file
-    name: Create secret using Podman auth file
-    runs-on: ubuntu-20.04
-    steps:
-      - uses: actions/checkout@v2
-
-      - name: OpenShift login
-        uses: redhat-actions/oc-login@v1
-        with:
-          openshift_server_url: ${{ secrets.OPENSHIFT_URL }}
-          openshift_token: ${{ secrets.OPENSHIFT_TOKEN }}
-          insecure_skip_tls_verify: true
-          namespace: ${{ env.TEST_NAMESPACE }}
-
       - name: Podman login
+        if: ${{ matrix.auth-type == 'podman' }}
         uses: redhat-actions/podman-login@v1
         with:
           registry: quay.io
@@ -90,13 +50,15 @@ jobs:
       # This step will create a deployment, service, and route to run your app and expose it to the internet.
       - name: Create and expose app
         id: oc-new-app
+        # uses: redhat-actions/oc-new-app@v1
+        # Test the checked-out version of this action - a user would need the above 'uses'.
         uses: ./
         with:
-          app_name: ${{ env.APP_NAME }}-podman-method
+          app_name: ${{ env.APP_NAME }}-docker-method
           image: ${{ env.IMAGE_PATH }}
           namespace: ${{ env.TEST_NAMESPACE }}
           port: ${{ env.APP_PORT }}
-          create_pull_secret_from: podman
+          create_pull_secret_from: ${{ matrix.auth-type }}
 
       - name: Echo outputs
         run: |
@@ -137,6 +99,8 @@ jobs:
       # This step will create a deployment, service, and route to run your app and expose it to the internet.
       - name: Create and expose app
         id: oc-new-app
+        # uses: redhat-actions/oc-new-app@v1
+        # Test the checked-out version of this action - a user would need the above 'uses'.
         uses: ./
         with:
           app_name: ${{ env.APP_NAME }}-creds-method
@@ -186,6 +150,8 @@ jobs:
       # This step will create a deployment, service, and route to run your app and expose it to the internet.
       - name: Create and expose app
         id: oc-new-app
+        # uses: redhat-actions/oc-new-app@v1
+        # Test the checked-out version of this action - a user would need the above 'uses'.
         uses: ./
         with:
           app_name: ${{ env.APP_NAME }}-secret-method
