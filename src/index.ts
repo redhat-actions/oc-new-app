@@ -61,7 +61,7 @@ async function run(): Promise<PullSecretData | undefined> {
     // Take down any old deployment
     await Deploy.deleteDeployment(appSelector, namespaceArg);
 
-    await Deploy.newApp(appName, image, buildEnvs, namespaceArg);
+    await Deploy.newApp(appName, image, buildEnvs, appSelector, namespaceArg);
 
     if (port) {
         await Deploy.patchSvc(appName, port, namespaceArg);

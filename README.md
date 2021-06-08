@@ -62,9 +62,8 @@ steps:
   uses: redhat-actions/oc-new-app@v1
   with:
     app_name: petclinic
-    image: quay.io/diagrawa/petclinic:latest
-    namespace: diagrawa-code
-    port: 8080
+    image: quay.io/redhat-github-actions/petclinic:v1
+    namespace: github-actions-bot-dev
 ```
 To build and push the container image to a registry such as [quay.io](https://quay.io), use the [**buildah-build**](https://github.com/redhat-actions/buildah-build)
 and [**push-to-registry**](https://github.com/redhat-actions/push-to-registry) actions.

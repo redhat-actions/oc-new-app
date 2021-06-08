@@ -14,13 +14,15 @@ namespace Deploy {
      * Creates new app with the image provided
      * @param appName Name of the app to use in 'oc new-app' command
      * @param image Image to create application from
+     * @param buildEnvs List of build environment key value pairs
+     * @param appSelector Label to set in all the created resources
      * @param namespace Namespace in which to create new app
      */
     export async function newApp(
-        appName: string, image: string, buildEnvs: string[], namespaceArg?: string
+        appName: string, image: string, buildEnvs: string[], appSelector: string, namespaceArg?: string
     ): Promise<void> {
         ghCore.info("⏳ Creating Deployment from image of the application...");
-        const ocOptions = Oc.getOptions({ name: appName });
+        const ocOptions = Oc.getOptions({ name: appName, labels: appSelector });
 
         buildEnvs.forEach((buildEnv) => {
             ocOptions.push(...Oc.getOptions({ "build-env": buildEnv }));

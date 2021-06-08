@@ -95,7 +95,7 @@ jobs:
       - name: Delete Image Stream
         if: ${{ matrix.image-source == 'IMAGE_STREAM' && always() }}
         run: |
-          oc delete is ${{ env.APP_NAME }}-${{ github.run_id }}
+          oc delete is $(oc get is | grep ${{ env.APP_NAME }} | awk '{ print $1 }' )
 
       - name: Tear down
         if: always()
