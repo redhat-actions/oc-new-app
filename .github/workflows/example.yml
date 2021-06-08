@@ -7,10 +7,12 @@ on:
 
 env:
   IMAGE_PATH: quay.io/redhat-github-actions/petclinic:latest
-  TEST_NAMESPACE: github-actions-bot-dev
+  TEST_NAMESPACE: diagrawa-dev
+  # TEST_NAMESPACE: github-actions-bot-dev
   APP_NAME: petclinic
   APP_PORT: 8080
-  IMAGE_STREAM: github-actions-bot-dev/petclinic-${{ github.run_id }}
+  IMAGE_STREAM: diagrawa-dev/petclinic-${{ github.run_id }}
+  # IMAGE_STREAM: github-actions-bot-dev/petclinic-${{ github.run_id }}
 
 jobs:
   ## To keep the workflow simple, we will only be using oc-new-app action in the workflow and use the
@@ -95,8 +97,8 @@ jobs:
       - name: Delete Image Stream
         if: ${{ matrix.image-source == 'IMAGE_STREAM' && always() }}
         run: |
-          oc delete is ${{ env.APP_NAME }}-${{ github.run_id }}
-
+          oc delete is $(oc get is | grep ${{ env.APP_NAME }} | awk '{ print $1 }' )
+        
       - name: Tear down
         if: always()
         run: |

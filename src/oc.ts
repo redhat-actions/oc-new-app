@@ -56,6 +56,7 @@ namespace Oc {
         DockerUsername = "docker-username",
         DockerPassword = "docker-password",
         BuildEnv = "build-env",
+        Label = "labels",
     }
 
     export type Options = { [key in Flags]?: string };
