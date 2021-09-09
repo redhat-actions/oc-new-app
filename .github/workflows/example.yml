@@ -11,6 +11,9 @@ env:
   APP_NAME: petclinic
   APP_PORT: 8080
   IMAGE_STREAM: github-actions-bot-dev/petclinic-${{ github.run_id }}
+concurrency:
+  group: example-workflow
+  cancel-in-progress: false
 
 jobs:
   ## To keep the workflow simple, we will only be using oc-new-app action in the workflow and use the

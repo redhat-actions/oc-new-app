@@ -12,6 +12,9 @@ env:
   APP_PORT: 8080
   PULL_SECRET_NAME: registry-pull-secret
   REGISTRY_USERNAME: redhat-github-actions+redhat_actions_ci_puller
+concurrency:
+  group: example-private-workflow
+  cancel-in-progress: false
 
 jobs:
   using-auth-file:
