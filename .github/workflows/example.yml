@@ -7,10 +7,9 @@ on:
 
 env:
   IMAGE_PATH: quay.io/redhat-github-actions/petclinic:latest
-  TEST_NAMESPACE: github-actions-bot-dev
   APP_NAME: petclinic
   APP_PORT: 8080
-  IMAGE_STREAM: github-actions-bot-dev/petclinic-${{ github.run_id }}
+  IMAGE_STREAM: ${{ secrets.OPENSHIFT_NAMESPACE }}/petclinic-${{ github.run_id }}
 concurrency:
   group: example-workflow
   cancel-in-progress: false
@@ -45,12 +44,12 @@ jobs:
       - name: OpenShift login
         uses: redhat-actions/oc-login@v1
         with:
-          openshift_server_url: ${{ secrets.OPENSHIFT_URL }}
+          openshift_server_url: ${{ secrets.OPENSHIFT_SERVER }}
           openshift_token: ${{ secrets.OPENSHIFT_TOKEN }}
           # openshift_username:
           # openshift_password:
           insecure_skip_tls_verify: true
-          namespace: ${{ env.TEST_NAMESPACE }}
+          namespace: ${{ secrets.OPENSHIFT_NAMESPACE }}
 
       - name: Create Image stream from the image
         if: ${{ matrix.image-source == 'IMAGE_STREAM' }}
@@ -61,15 +60,14 @@ jobs:
       # This step will create a deployment, service, and route to run your app and expose it to the internet.
       - name: Create and expose app
         id: oc-new-app
-        # uses: redhat-actions/oc-new-app@v1
-        # Test the checked-out version of this action - a user would need the above 'uses'.
+        # uses: redhat-actions/oc-new-app@v1 Test the checked-out version of this action - a user would need the above 'uses'.
         uses: ./
         env:
           IMAGE: ${{ env[matrix.image-source] }}
         with:
           app_name: ${{ env.APP_NAME }}-${{ steps.commit-data.outputs.short_sha }}
           image: ${{ env.IMAGE }}
-          namespace: ${{ env.TEST_NAMESPACE }}
+          namespace: ${{ secrets.OPENSHIFT_NAMESPACE }}
           build_env: |
             MY_ENV=MY_VALUE
           # port: ${{ env.APP_PORT }}
@@ -103,4 +101,4 @@ jobs:
       - name: Tear down
         if: always()
         run: |
-          oc delete all,secret --selector=${{ steps.oc-new-app.outputs.selector }} -n ${{ env.TEST_NAMESPACE }}
+          oc delete all,secret --selector=${{ steps.oc-new-app.outputs.selector }} -n ${{ secrets.OPENSHIFT_NAMESPACE }}

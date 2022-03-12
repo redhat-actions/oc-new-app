@@ -7,7 +7,6 @@ on:
 
 env:
   IMAGE_PATH: quay.io/redhat-github-actions/petclinic-private:latest
-  TEST_NAMESPACE: github-actions-bot-dev
   APP_NAME: petclinic
   APP_PORT: 8080
   PULL_SECRET_NAME: registry-pull-secret
@@ -31,10 +30,10 @@ jobs:
       - name: OpenShift login
         uses: redhat-actions/oc-login@v1
         with:
-          openshift_server_url: ${{ secrets.OPENSHIFT_URL }}
+          openshift_server_url: ${{ secrets.OPENSHIFT_SERVER }} 
           openshift_token: ${{ secrets.OPENSHIFT_TOKEN }}
           insecure_skip_tls_verify: true
-          namespace: ${{ env.TEST_NAMESPACE }}
+          namespace: ${{ secrets.OPENSHIFT_NAMESPACE }}
 
       - name: Docker login
         if: ${{ matrix.auth-type == 'docker' }}
@@ -58,7 +57,7 @@ jobs:
         with:
           app_name: ${{ env.APP_NAME }}-${{ matrix.auth-type }}
           image: ${{ env.IMAGE_PATH }}
-          namespace: ${{ env.TEST_NAMESPACE }}
+          namespace: ${{ secrets.OPENSHIFT_NAMESPACE }}
           port: ${{ env.APP_PORT }}
           create_pull_secret_from: ${{ matrix.auth-type }}
 
@@ -82,7 +81,7 @@ jobs:
       - name: Tear down
         if: always()
         run:
-          oc delete all,secret --selector=${{ steps.oc-new-app.outputs.selector }} -n ${{ env.TEST_NAMESPACE }}
+          oc delete all,secret --selector=${{ steps.oc-new-app.outputs.selector }} -n ${{ secrets.OPENSHIFT_NAMESPACE }}
 
   using-registry-creds:
     name: Create secret using registry creds
@@ -93,10 +92,10 @@ jobs:
       - name: OpenShift login
         uses: redhat-actions/oc-login@v1
         with:
-          openshift_server_url: ${{ secrets.OPENSHIFT_URL }}
+          openshift_server_url: ${{ secrets.OPENSHIFT_SERVER }}
           openshift_token: ${{ secrets.OPENSHIFT_TOKEN }}
           insecure_skip_tls_verify: true
-          namespace: ${{ env.TEST_NAMESPACE }}
+          namespace: ${{ secrets.OPENSHIFT_NAMESPACE }}
 
       # This step will create a deployment, service, and route to run your app and expose it to the internet.
       - name: Create and expose app
@@ -107,7 +106,7 @@ jobs:
         with:
           app_name: ${{ env.APP_NAME }}-creds
           image: ${{ env.IMAGE_PATH }}
-          namespace: ${{ env.TEST_NAMESPACE }}
+          namespace: ${{ secrets.OPENSHIFT_NAMESPACE }}
           port: ${{ env.APP_PORT }}
           registry_hostname: quay.io
           registry_username: ${{ env.REGISTRY_USERNAME }}
@@ -133,7 +132,7 @@ jobs:
       - name: Tear down
         if: always()
         run:
-          oc delete all,secret --selector=${{ steps.oc-new-app.outputs.selector }} -n ${{ env.TEST_NAMESPACE }}
+          oc delete all,secret --selector=${{ steps.oc-new-app.outputs.selector }} -n ${{ secrets.OPENSHIFT_NAMESPACE }}
 
   using-existing-pull-secret:
     name: Use existing pull secret
@@ -144,10 +143,10 @@ jobs:
       - name: OpenShift login
         uses: redhat-actions/oc-login@v1
         with:
-          openshift_server_url: ${{ secrets.OPENSHIFT_URL }}
+          openshift_server_url: ${{ secrets.OPENSHIFT_SERVER }}
           openshift_token: ${{ secrets.OPENSHIFT_TOKEN }}
           insecure_skip_tls_verify: true
-          namespace: ${{ env.TEST_NAMESPACE }}
+          namespace: ${{ secrets.OPENSHIFT_NAMESPACE }}
 
       # This step will create a deployment, service, and route to run your app and expose it to the internet.
       - name: Create and expose app
@@ -158,7 +157,7 @@ jobs:
         with:
           app_name: ${{ env.APP_NAME }}-secret
           image: ${{ env.IMAGE_PATH }}
-          namespace: ${{ env.TEST_NAMESPACE }}
+          namespace: ${{ secrets.OPENSHIFT_NAMESPACE }}
           port: ${{ env.APP_PORT }}
           image_pull_secret_name: ${{ env.PULL_SECRET_NAME }}
 
@@ -182,4 +181,4 @@ jobs:
       - name: Tear down
         if: always()
         run:
-          oc delete all,secret --selector=${{ steps.oc-new-app.outputs.selector }} -n ${{ env.TEST_NAMESPACE }}
+          oc delete all,secret --selector=${{ steps.oc-new-app.outputs.selector }} -n ${{ secrets.OPENSHIFT_NAMESPACE }}
