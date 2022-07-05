@@ -1,5 +1,11 @@
 # oc-new-app Changelog
 
+## v1.2.3
+- Fix podman auth file issue while creating secrets
+
+## v1.2.2
+- Fix openshift.com/try link that is now a 404
+
 ## v1.2.1
 - Add label in the `oc new-app` command to add labels in the all the created resources
 
