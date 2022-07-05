@@ -123,7 +123,12 @@ async function createPullSecretFromDocker(
 async function createPullSecretFromPodman(
     pullSecretName: string, appSelector: string, namespaceArg: string,
 ): Promise<boolean> {
-    const podmanAuthFilePath = path.join("/tmp", `podman-run-${process.getuid()}`, "containers/auth.json");
+    let authFileDir = path.join("/", "tmp", `podman-run-${process.getuid()}`);
+    if (process.env.XDG_RUNTIME_DIR) {
+        authFileDir = process.env.XDG_RUNTIME_DIR;
+    }
+    const podmanAuthFilePath = path.join(authFileDir,
+        "containers", "auth.json");
     if (await utils.fileExists(podmanAuthFilePath)) {
         await Deploy.createPullSecretFromFile(pullSecretName, podmanAuthFilePath, appSelector, namespaceArg);
         await Deploy.linkSecretToServiceAccount(pullSecretName, namespaceArg);
