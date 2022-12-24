@@ -235,7 +235,7 @@ namespace Deploy {
             }
         }
         catch (error) {
-            ghCore.info(error);
+            ghCore.info(`Error: ${error}`);
         }
 
         return false;
