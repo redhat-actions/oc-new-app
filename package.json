@@ -2,7 +2,7 @@
   "name": "oc-new-app",
   "version": "1.0.0",
   "engines": {
-    "node": "12"
+    "node": "16"
   },
   "description": "Action for deploying and exposing application on Openshift",
   "repository": {
