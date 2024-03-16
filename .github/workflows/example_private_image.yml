@@ -23,9 +23,9 @@ jobs:
       matrix:
         auth-type: [ "docker", "podman" ]
 
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
 
       - name: OpenShift login
         uses: redhat-actions/oc-login@v1
@@ -85,9 +85,9 @@ jobs:
 
   using-registry-creds:
     name: Create secret using registry creds
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
 
       - name: OpenShift login
         uses: redhat-actions/oc-login@v1
@@ -136,9 +136,9 @@ jobs:
 
   using-existing-pull-secret:
     name: Use existing pull secret
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
 
       - name: OpenShift login
         uses: redhat-actions/oc-login@v1

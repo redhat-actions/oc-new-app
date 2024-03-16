@@ -52,5 +52,5 @@ outputs:
   selector:
     description: "Selector to filter out the deployment"
 runs:
-  using: 'node16'
+  using: 'node20'
   main: 'dist/index.js'

@@ -19,7 +19,11 @@ namespace Deploy {
      * @param namespace Namespace in which to create new app
      */
     export async function newApp(
-        appName: string, image: string, buildEnvs: string[], appSelector: string, namespaceArg?: string
+        appName: string,
+        image: string,
+        buildEnvs: string[],
+        appSelector: string,
+        namespaceArg?: string
     ): Promise<void> {
         ghCore.info("⏳ Creating Deployment from image of the application...");
         const ocOptions = Oc.getOptions({ name: appName, labels: appSelector });
@@ -137,7 +141,10 @@ namespace Deploy {
     }
 
     export async function createPullSecretFromFile(
-        pullSecretName: string, authFilePath: string, appSelector: string, namespaceArg?: string
+        pullSecretName: string,
+        authFilePath: string,
+        appSelector: string,
+        namespaceArg?: string
     ): Promise<void> {
         // check if pull secret exists or not
         if (await isPullSecretExists(pullSecretName, namespaceArg)) {
@@ -163,8 +170,12 @@ namespace Deploy {
     }
 
     export async function createPullSecretFromCreds(
-        pullSecretName: string, registryServer: string, registryUsername: string,
-        registryPassword: string, appSelector: string, namespaceArg?: string
+        pullSecretName: string,
+        registryServer: string,
+        registryUsername: string,
+        registryPassword: string,
+        appSelector: string,
+        namespaceArg?: string
     ): Promise<void> {
         // check if pull secret exists or not
         if (await isPullSecretExists(pullSecretName, namespaceArg)) {
@@ -228,7 +239,8 @@ namespace Deploy {
         }
         try {
             const commandResult = await Oc.exec(
-                ocExecArgs, { ignoreReturnCode: true, failOnStdErr: false, group: true }
+                ocExecArgs,
+                { ignoreReturnCode: true, failOnStdErr: false, group: true }
             );
             if (commandResult.exitCode === 0) {
                 return true;

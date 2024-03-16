@@ -28,10 +28,10 @@ jobs:
       matrix:
         image-source: [ "IMAGE_PATH", "IMAGE_STREAM" ]
 
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     steps:
       - name: Checkout action
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
 
        # Use the commit short-sha as the suffix of the app_name
       - name: Get commit short-sha
