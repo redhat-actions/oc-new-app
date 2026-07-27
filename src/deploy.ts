@@ -254,8 +254,6 @@ namespace Deploy {
     }
 
     async function checkPullSecretWithLabel(pullSecretName: string, namespaceArg?: string): Promise<boolean> {
-        let secretExists = false;
-
         ghCore.info(`🔎 Checking if secret "${pullSecretName}" with label "${secretLabel}" exists`);
         const jsonPath = "{.items[*].metadata.name}";
         const ocOptions = Oc.getOptions({ selector: secretLabel, output: "" });
@@ -269,9 +267,8 @@ namespace Deploy {
         }
         const execResult = await Oc.exec(ocExecArgs);
         const secretsList = execResult.stdout.trim().split(" ");
-        secretExists = secretsList.some((secretName) => secretName === pullSecretName);
 
-        return secretExists;
+        return secretsList.some((secretName) => secretName === pullSecretName);
     }
 
     export async function deletePullSecretWithLabel(pullSecretName: string, namespaceArg?: string): Promise<void> {
