@@ -1,9 +1,8 @@
 # oc-new-app
 [![CI checks](https://github.com/redhat-actions/oc-new-app/actions/workflows/ci-checks.yml/badge.svg)](https://github.com/redhat-actions/oc-new-app/actions/workflows/ci-checks.yml)
-[![OpenShift Pet Clinic Workflow](https://github.com/redhat-actions/oc-new-app/actions/workflows/example.yml/badge.svg)](https://github.com/redhat-actions/oc-new-app/actions/workflows/example.yml)
 [![Link checker](https://github.com/redhat-actions/oc-new-app/workflows/Link%20checker/badge.svg)](https://github.com/redhat-actions/oc-new-app/actions?query=workflow%3A%22Link+checker%22)
 
-[![tag badge](https://img.shields.io/github/v/tag/redhat-actions/oc-new-app)](https://github.com/redhat-actions/buildah-build/tags)
+[![tag badge](https://img.shields.io/github/v/tag/redhat-actions/oc-new-app)](https://github.com/redhat-actions/oc-new-app/tags)
 [![license badge](https://img.shields.io/github/license/redhat-actions/oc-new-app)](./LICENSE)
 [![size badge](https://img.shields.io/github/size/redhat-actions/oc-new-app/dist/index.js)](./dist)
 
@@ -19,7 +18,7 @@ It creates a Deployment which runs the application Pod, and then exposes that po
 
 - An OpenShift Cluster is required. To try an OpenShift cluster, visit [openshift.com/try](https://openshift.com/try) or sign up for our [Developer Sandbox](https://developers.redhat.com/developer-sandbox).
 - `oc` must be installed on the GitHub Action runner you specify.
-    - Presently the [Ubuntu Environments](https://github.com/actions/virtual-environments#available-environments) come with `oc` 4.7.0 installed.
+    - Presently the [Ubuntu Environments](https://github.com/actions/virtual-environments#available-environments) come with `oc` pre-installed.
     - If you want a different version of `oc`, or if you are using the Mac or Windows environments, use the [**openshift-tools-installer**](https://github.com/redhat-actions/openshift-tools-installer) to install `oc` before running this action.
 - You must log in to your OpenShift cluster, preferably by using [**oc-login**](https://github.com/redhat-actions/oc-login).
 
@@ -30,7 +29,8 @@ It creates a Deployment which runs the application Pod, and then exposes that po
 | Input | Description | Default |
 | ----- | ----------- | ------- |
 | app_name | Name to use for the generated application artifacts. | **Must be provided** |
-| build_env | Environment variable key-value pairs to pass to the build container at the run time. Use the form `env_name=env_value`, and separate arguments with newlines. | None
+| build_env | Environment variable key-value pairs to pass to the S2I build container. These are only used during the build phase and are not set on the running deployment. Use the form `env_name=env_value`, and separate arguments with newlines. | None
+| env | Environment variable key-value pairs to set on the deployed application containers. Use the form `env_name=env_value`, and separate arguments with newlines. | None
 | create_pull_secret_from | Registry credentials file to use to create a pull secret. Set this to `docker` or `podman` depending on which tool you used to log in. See [using-private-images](#using-private-images). | None
 | image | The fully qualified name of the application image. It can be a container image or an image stream. For more information, refer to [the OpenShift documentation](https://docs.openshift.com/container-platform/4.7/applications/application_life_cycle_management/creating-applications-using-cli.html#applications-create-using-cli-image_creating-applications-using-cli). | **Must be provided** |
 | image_pull_secret_name | In the case of private images, provide the image pull secret name if you have already created that. Otherwise, see [using-private-images](#using-private-images). | None
@@ -53,22 +53,38 @@ It creates a Deployment which runs the application Pod, and then exposes that po
 
 ## Example
 
-The example below shows how the **oc-new-app** action can be used to deploy and expose a
+The example below shows how the **oc-new-app** action can be used to deploy and expose an
 application on OpenShift.
 
 ```yaml
 steps:
 - name: Create and expose app
-  uses: redhat-actions/oc-new-app@v1
+  uses: redhat-actions/oc-new-app@v2
   with:
     app_name: petclinic
     image: quay.io/redhat-github-actions/petclinic:v1
     namespace: github-actions-bot-dev
 ```
+
+To set runtime environment variables on the deployed containers, use the `env` input:
+
+```yaml
+steps:
+- name: Create and expose app
+  uses: redhat-actions/oc-new-app@v2
+  with:
+    app_name: my-database
+    image: registry.access.redhat.com/rhel9/postgresql-16:latest
+    namespace: my-project
+    port: 5432
+    env: |
+      POSTGRESQL_USER=admin
+      POSTGRESQL_PASSWORD=secret
+      POSTGRESQL_DATABASE=mydb
+```
+
 To build and push the container image to a registry such as [quay.io](https://quay.io), use the [**buildah-build**](https://github.com/redhat-actions/buildah-build)
 and [**push-to-registry**](https://github.com/redhat-actions/push-to-registry) actions.
-
-For a complete example see the [example workflow](.github/workflows/example.yml).
 
 <a id="using-private-images"></a>
 
