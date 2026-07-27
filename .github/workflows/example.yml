@@ -5,6 +5,9 @@ on:
   schedule:
     - cron: '0 0 * * *'  # every day at midnight
 
+permissions:
+  contents: read
+
 env:
   IMAGE_PATH: quay.io/redhat-github-actions/petclinic:latest
   APP_NAME: petclinic
@@ -28,21 +31,21 @@ jobs:
       matrix:
         image-source: [ "IMAGE_PATH", "IMAGE_STREAM" ]
 
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     steps:
       - name: Checkout action
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
        # Use the commit short-sha as the suffix of the app_name
       - name: Get commit short-sha
         id: commit-data
-        uses: redhat-actions/common/commit-data@v1
+        uses: redhat-actions/common/commit-data@v2
 
       # Log into the OpenShift cluster using the secrets configured in the repository settings.
       # The GitHub Ubuntu runners have oc pre-installed.
       # If you're not using those runners, be sure to check out https://github.com/redhat-actions/openshift-tools-installer.
       - name: OpenShift login
-        uses: redhat-actions/oc-login@v1
+        uses: redhat-actions/oc-login@v2
         with:
           openshift_server_url: ${{ secrets.OPENSHIFT_SERVER }}
           openshift_token: ${{ secrets.OPENSHIFT_TOKEN }}
@@ -84,7 +87,7 @@ jobs:
       # This step is retried since the time to pull the image and start the pod can vary.
       - name: Test project is running
         id: test-project
-        uses: nick-invision/retry@v2.2.0
+        uses: nick-fields/retry@v4
         with:
           timeout_seconds: 3
           retry_wait_seconds: 10
