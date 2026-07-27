@@ -25,6 +25,7 @@ async function run(): Promise<PullSecretData | undefined> {
     const registryPassword = ghCore.getInput(Inputs.REGISTRY_PASSWORD);
     const imagePullSecretName = ghCore.getInput(Inputs.IMAGE_PULL_SECRET_NAME);
     const buildEnvs = utils.getInputList(Inputs.BUILD_ENV);
+    const envs = utils.getInputList(Inputs.ENV);
 
     const appSelector = utils.getSelector(appName);
 
@@ -69,7 +70,7 @@ async function run(): Promise<PullSecretData | undefined> {
     // Take down any old deployment
     await Deploy.deleteDeployment(appSelector, namespaceArg);
 
-    await Deploy.newApp(appName, image, buildEnvs, appSelector, namespaceArg);
+    await Deploy.newApp(appName, image, buildEnvs, envs, appSelector, namespaceArg);
 
     if (port) {
         await Deploy.patchSvc(appName, port, namespaceArg);

@@ -56,6 +56,7 @@ namespace Oc {
         DockerUsername = "docker-username",
         DockerPassword = "docker-password",
         BuildEnv = "build-env",
+        Env = "env",
         Label = "labels",
     }
 

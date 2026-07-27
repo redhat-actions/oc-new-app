@@ -7,7 +7,8 @@ export enum Inputs {
      */
     APP_NAME = "app_name",
     /**
-     * "Environment variable key-value pairs to pass to the build container at the run time.
+     * "Environment variable key-value pairs to pass to the S2I build container.
+     * These are only used during the build phase and are not set on the running deployment.
      * Use the form env_name=env_value, and separate arguments with newlines."
      * Required: false
      * Default: None.
@@ -20,6 +21,13 @@ export enum Inputs {
      * Default: None.
      */
     CREATE_PULL_SECRET_FROM = "create_pull_secret_from",
+    /**
+     * "Environment variable key-value pairs to set on the deployed application containers.
+     * Use the form env_name=env_value, and separate arguments with newlines."
+     * Required: false
+     * Default: None.
+     */
+    ENV = "env",
     /**
      * "The name (reference) of the image to create deployment.
      * It can be a container image or an image stream"
