@@ -39,7 +39,7 @@ export async function fileExists(filePath: string): Promise<boolean> {
         await fs.access(filePath);
         return true;
     }
-    catch (err) {
+    catch {
         return false;
     }
 }
