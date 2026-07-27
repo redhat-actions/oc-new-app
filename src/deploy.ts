@@ -14,7 +14,8 @@ namespace Deploy {
      * Creates new app with the image provided
      * @param appName Name of the app to use in 'oc new-app' command
      * @param image Image to create application from
-     * @param buildEnvs List of build environment key value pairs
+     * @param buildEnvs List of build environment key value pairs (for S2I builds)
+     * @param envs List of runtime environment key value pairs
      * @param appSelector Label to set in all the created resources
      * @param namespace Namespace in which to create new app
      */
@@ -22,6 +23,7 @@ namespace Deploy {
         appName: string,
         image: string,
         buildEnvs: string[],
+        envs: string[],
         appSelector: string,
         namespaceArg?: string
     ): Promise<void> {
@@ -30,6 +32,10 @@ namespace Deploy {
 
         buildEnvs.forEach((buildEnv) => {
             ocOptions.push(...Oc.getOptions({ "build-env": buildEnv }));
+        });
+
+        envs.forEach((env) => {
+            ocOptions.push(...Oc.getOptions({ env }));
         });
 
         const ocExecArgs = [ Oc.Commands.NewApp, ...ocOptions, image ];
@@ -119,8 +125,13 @@ namespace Deploy {
         await Oc.exec(ocExecArgs);
     }
 
+    const ROUTE_RETRY_COUNT = 10;
+    const ROUTE_RETRY_DELAY_MS = 3000;
+
     /**
-     * Get route of the exposed service of the application
+     * Get route of the exposed service of the application.
+     * Retries if the route host is not yet populated (race condition
+     * where the route object exists but .spec.host is still empty).
      * @param appName Name of the app for which to find the route
      * @param namespace Namespace in which created app exists
      */
@@ -136,8 +147,30 @@ namespace Deploy {
             ocExecArgs.push(namespaceArg);
         }
 
-        const execResult = await Oc.exec(ocExecArgs);
-        return execResult.stdout.trim();
+        for (let attempt = 1; attempt <= ROUTE_RETRY_COUNT; attempt++) {
+            const execResult = await Oc.exec(ocExecArgs);
+            const host = execResult.stdout.trim();
+            if (host) {
+                return host;
+            }
+            if (attempt < ROUTE_RETRY_COUNT) {
+                ghCore.info(
+                    `Route host not yet available (attempt ${attempt}/${ROUTE_RETRY_COUNT}), `
+                    + `retrying in ${ROUTE_RETRY_DELAY_MS / 1000}s...`
+                );
+                await delay(ROUTE_RETRY_DELAY_MS);
+            }
+        }
+
+        ghCore.warning(
+            `Route host was not populated after ${ROUTE_RETRY_COUNT} attempts. `
+            + `The route output may be incomplete.`
+        );
+        return "";
+    }
+
+    function delay(ms: number): Promise<void> {
+        return new Promise((resolve) => { setTimeout(resolve, ms); });
     }
 
     export async function createPullSecretFromFile(

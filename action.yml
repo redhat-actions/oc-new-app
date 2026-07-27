@@ -10,7 +10,13 @@ inputs:
     required: true
   build_env:
     description: |
-      "Environment variable key-value pairs to pass to the build container at the run time.
+      "Environment variable key-value pairs to pass to the S2I build container.
+      These are only used during the build phase and are not set on the running deployment.
+      Use the form env_name=env_value, and separate arguments with newlines."
+    required: false
+  env:
+    description: |
+      "Environment variable key-value pairs to set on the deployed application containers.
       Use the form env_name=env_value, and separate arguments with newlines."
     required: false
   create_pull_secret_from:
