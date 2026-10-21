@@ -8,7 +8,7 @@
 
 **oc-new-app** is a Github Action for deploying and exposing a single-container application on OpenShift.
 
-This action wraps [`oc new-app`](https://docs.openshift.com/container-platform/4.6/applications/application_life_cycle_management/creating-applications-using-cli.html) to provide a simple interface for deploying an application.
+This action wraps [`oc new-app`](https://docs.redhat.com/en/documentation/openshift_container_platform/4.22/html-single/building_applications/index#creating-applications-using-cli) to provide a simple interface for deploying an application.
 
 It creates a Deployment which runs the application Pod, and then exposes that pod to the internet through a Service and a Route.
 
@@ -16,7 +16,7 @@ It creates a Deployment which runs the application Pod, and then exposes that po
 
 ## Prerequisites
 
-- An OpenShift Cluster is required. To try an OpenShift cluster, visit [openshift.com/try](https://openshift.com/try) or sign up for our [Developer Sandbox](https://developers.redhat.com/developer-sandbox).
+- An OpenShift Cluster is required. To try an OpenShift cluster, visit [Try OpenShift](https://www.redhat.com/en/technologies/cloud-computing/openshift/try-it) or sign up for our [Developer Sandbox](https://developers.redhat.com/developer-sandbox).
 - `oc` must be installed on the GitHub Action runner you specify.
     - Presently the [Ubuntu Environments](https://github.com/actions/virtual-environments#available-environments) come with `oc` pre-installed.
     - If you want a different version of `oc`, or if you are using the Mac or Windows environments, use the [**openshift-tools-installer**](https://github.com/redhat-actions/openshift-tools-installer) to install `oc` before running this action.
@@ -32,10 +32,10 @@ It creates a Deployment which runs the application Pod, and then exposes that po
 | build_env | Environment variable key-value pairs to pass to the S2I build container. These are only used during the build phase and are not set on the running deployment. Use the form `env_name=env_value`, and separate arguments with newlines. | None
 | env | Environment variable key-value pairs to set on the deployed application containers. Use the form `env_name=env_value`, and separate arguments with newlines. | None
 | create_pull_secret_from | Registry credentials file to use to create a pull secret. Set this to `docker` or `podman` depending on which tool you used to log in. See [using-private-images](#using-private-images). | None
-| image | The fully qualified name of the application image. It can be a container image or an image stream. For more information, refer to [the OpenShift documentation](https://docs.openshift.com/container-platform/4.7/applications/application_life_cycle_management/creating-applications-using-cli.html#applications-create-using-cli-image_creating-applications-using-cli). | **Must be provided** |
+| image | The fully qualified name of the application image. It can be a container image or an image stream. For more information, refer to [the OpenShift documentation](https://docs.redhat.com/en/documentation/openshift_container_platform/4.22/html-single/building_applications/index#applications-create-using-cli-image_creating-applications-using-cli). | **Must be provided** |
 | image_pull_secret_name | In the case of private images, provide the image pull secret name if you have already created that. Otherwise, see [using-private-images](#using-private-images). | None
 | namespace | OpenShift project/Kubernetes namespace to target. | Current context |
-| port | A port to expose from the application container through a Service. If exactly one port is exposed in the container metadata, then this input can be omitted. For more details [see](https://docs.openshift.com/container-platform/4.7/applications/application_life_cycle_management/creating-applications-using-cli.html#applications-create-using-cli-modify_creating-applications-using-cli). | None |
+| port | A port to expose from the application container through a Service. If exactly one port is exposed in the container metadata, then this input can be omitted. For more details [see](https://docs.redhat.com/en/documentation/openshift_container_platform/4.22/html-single/building_applications/index#applications-create-using-cli-modify_creating-applications-using-cli). | None |
 | registry_hostname | The Hostname/domain of the container image registry such as quay.io, or docker.io that a private container image will be pulled from. The pull secret is used to access this registry. See [using-private-images](#using-private-images). | None
 | registry_username | Registry username to use for the pull secret. | None
 | registry_password | Password, encrypted password, or access token of the provided registry to use for the pull secret. | None
@@ -90,7 +90,7 @@ and [**push-to-registry**](https://github.com/redhat-actions/push-to-registry) a
 
 ## Using private images
 
-If your deployment requires a private image, this action will create an [image pull secret](https://docs.openshift.com/container-platform/4.7/openshift_images/managing_images/using-image-pull-secrets.html#images-allow-pods-to-reference-images-from-secure-registries_using-image-pull-secrets) which will allow
+If your deployment requires a private image, this action will create an [image pull secret](https://docs.redhat.com/en/documentation/openshift_container_platform/4.22/html-single/images/index#images-allow-pods-to-reference-images-from-secure-registries_using-image-pull-secrets) which will allow
 to reference image from secured registries. Use one of the methods given below to setup image pull secret:
 
 - If you have already created the secret, use the `image_pull_secret_name` input to specify the name of the created pull secret. Make sure that secret is created in the namespace in which you want to create the deployment.
